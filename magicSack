@@ -1,0 +1,95 @@
+#!/usr/bin/python
+#
+# ~/dev/py/magicsack/magicSack
+
+import getpass, os, sys
+from argparse   import ArgumentParser
+from magicsack  import *
+
+def makeListing(args):
+
+    # this is here because assignment of args.uDir to None fails
+    if args.uDir and args.uDir != "":
+        uDir = args.uDir
+    else:
+        uDir = None
+
+    testing     = args.testing
+    uDir        = args.uDir
+    verbose     = args.verbose
+
+    # XXX STUB XX
+
+def main():
+    """
+    Expect a command like
+        magicSack [options] 
+
+    """
+
+    passPh = getpass.getpass('passphrase: ')
+    if not passPh or passPh == '':
+        print 'you must supply a passphrase'
+        sys.exit(1)
+    # DEBUG
+    # END
+    
+    # program defaults ----------------------------------------------
+
+    # parse the command line ----------------------------------------
+    
+    DESC = 'utility for managing (possibly distributed) encrypted files'
+    parser = ArgumentParser(description=DESC)
+
+    parser.add_argument('-j', '--justShow', action='store_true',
+        help='show options and exit')
+
+    parser.add_argument('-T', '--testing', action='store_true',
+        help='this is a test run')
+
+    parser.add_argument('-u', '--uDir', 
+        help='path to uDir (relative to tmp/ if testing)')
+
+    parser.add_argument('-v', '--verbose', action='store_true',
+        help='be chatty')
+
+    args = parser.parse_args()
+
+    # fixups --------------------------------------------------------
+
+    # sanity checks -------------------------------------------------
+
+    # fixups --------------------------------------------------------
+
+    # uDir ------------------------------------------------
+    if args.testing and args.uDir:
+        if args.uDir[0] == '/':
+            args.uDir = args.uDir[1:]
+        args.uDir = os.path.join('tmp', args.uDir)
+
+    # complete setup ------------------------------------------------
+    appName = 'magicSack %s' % __version__
+
+    # maybe show options and such -----------------------------------
+    if args.verbose or args.justShow:
+        print "%s %s" % (appName, __version_date__)
+
+    if args.verbose or args.justShow:
+        print 'testing      = ' + str(args.testing)
+        print 'uDir         = ' + str(args.uDir)
+        print 'verbose      = ' + str(args.verbose)
+
+        # DEBUG
+        # END
+        print "passphrase   = " + str(passPh)
+
+    if args.justShow:
+        sys.exit(0)
+
+    # do what's required --------------------------------------------
+    makeListing(args)
+
+        
+if __name__ == '__main__':
+    main()
+

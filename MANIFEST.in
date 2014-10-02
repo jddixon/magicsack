@@ -1,0 +1,10 @@
+# see http://docs.python.org/distutils/sourcedist.html
+
+include netDistrib.conf
+include CHANGES MANIFEST.in README TODO
+include magicSack
+recursive-include magicsack *.py
+global-exclude junk* .*swp 
+prune   .svn
+
+
