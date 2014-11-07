@@ -1,4 +1,12 @@
 ~/dev/py/magicksack/TODO
 
+2014-11-07
+    * clone in ~/dev/gh-pages/magicksack, then orphan                   * DONE
+    IN ~/dev/py/magicsack
+    * sdMigrate magicsack								                * DONE
+    * saveOldGits								                        * DONE
+    * sdPreen magicsack                                                 * DONE
+
 2014-10-02
-    *
+    * see sharedev/README for things to do -- splitting, etc
+    * consider option to store in S3

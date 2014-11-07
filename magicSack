@@ -2,9 +2,12 @@
 #
 # ~/dev/py/magicsack/magicSack
 
-import getpass, os, sys
 from argparse   import ArgumentParser
 from magicsack  import *
+
+import getpass, os, sys
+from pbkdf2         import crypt, PBKDF2   # note name of package is l/c
+from Crypto.Cipher  import AES
 
 def makeListing(args):
 
@@ -20,6 +23,32 @@ def makeListing(args):
 
     # XXX STUB XX
 
+def reinit(args, passPhrase):
+        salt    = os.urandom(8)
+        key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
+        iv      = os.urandom(16)                    # 16-byte IV
+        cipher  = AES.new(key, AES.MODE_CBC, iv)
+        pp2     = getpass.getpass("Confirm passphrase: ")
+
+        pwHash  = crypt(key)
+
+        # DEBUG
+        print "PW_HASH: " + pwHash
+        print "PW_HASH: %s" % pwHash
+
+        if pp2 != passPhrase:
+            print "oh, learn how to type, dummy!"
+
+        # END
+
+        # if everything is OK we write ppHash to /var/app/magicSack/ppHash,
+        # unless of course we are testing
+
+def verifyPassPhrase(args, passPhrase):
+    # apps directory must exist
+    # XXX STUB XXX
+    pass
+
 def main():
     """
     Expect a command like
@@ -27,7 +56,7 @@ def main():
 
     """
 
-    passPh = getpass.getpass('passphrase: ')
+    passPh = getpass.getpass('Passphrase: ')
     if not passPh or passPh == '':
         print 'you must supply a passphrase'
         sys.exit(1)
@@ -40,6 +69,9 @@ def main():
     
     DESC = 'utility for managing (possibly distributed) encrypted files'
     parser = ArgumentParser(description=DESC)
+
+    parser.add_argument('-i', '--initializing', action='store_true',
+        help='changing passphrase')
 
     parser.add_argument('-j', '--justShow', action='store_true',
         help='show options and exit')
@@ -54,6 +86,14 @@ def main():
         help='be chatty')
 
     args = parser.parse_args()
+
+    # reinitializing ------------------------------------------------
+    if args.initializing:
+        reinit(args, passPh)
+    else:
+        verifyPassPhrase(args, passPh)
+    # otherwise, apps directory must exist
+    # XXX STUB XXX
 
     # fixups --------------------------------------------------------
 
