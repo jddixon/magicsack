@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+0.2.0
+    2014-12-15
+        * convert to Python 3                                       SLOC  185
 0.1.1
     2014-11-07
         * add PBKDF2 passphrase verification                        SLOC  173
