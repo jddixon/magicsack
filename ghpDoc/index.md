@@ -3,9 +3,9 @@
 
 Magicsack is a utility for storing secret things either locally (on the
 user's laptop or workstation) or over a distributed set of cooperating servers
-or on one of the cloud services.
+or on one of the cloud services or on some combination of the three.
 
-Magicksack is in development using Python 3 on Linux.  This should 
+Magicksack is in development using Python 3 on Linux.  It should 
 work on Windows as well, but no effort will be made to confirm this
 until the development version is stable on Linux.
 
@@ -19,7 +19,8 @@ It should be possible to generate a different key for each document.  The
 index from the user-assigned key to the encrypted document is stored 
 locally.  The encrypted documents may be stored locally or on one or more
 cooperating servers or on a cloud service or any combination of the 
-three.  The index is always AES-encrypted before being stored.  
+three.  The index is always digitally signed and AES-encrypted before 
+being stored.  
 
 The system generates two 2048-bit RSA keypairs.  One of these, **skPriv**,
 is used
@@ -48,8 +49,9 @@ of `init`, if the passphrase is wrong, the command will have no effect.
 This command creates a new local instance, storing information under 
 `.magicsack` in the user's home directory.  If the `.magicsack` directory
 aleady exists, the command will fail, unless the command line includes
-the `-f` option.  Unless otherwise specified data will be stored in 
-`.magicsack/uDir`.  If the `-u` option is present data will be stored
+the `-f` or `--force` option.  Unless otherwise specified documents will be 
+stored in 
+`.magicsack/uDir`.  If the `-u` option is present, documents will be stored
 in `uDir` instead.
 
 The `init` command asks for a passphrase which then becomes the key 
@@ -66,6 +68,11 @@ directory does not exist, `magicsack` will attempt to create it
 
 This command erases anything under `.magicsack`.  If `uDir` is not a 
 subdirectory of `.magicsack`, `uDir` will be erased if the system permits.
+
+This operation is irrevocable.  If the correct passphrase is supplied, 
+all information on the user's machine relating to the `magicsack` 
+installation will be erased, unless somehow otherwise protected by 
+the system.
 
 ### add
 
@@ -87,12 +94,14 @@ where the size is the size before encryption.
 
 ### show
 
-`show` must be followed by one or more globs.  Any file whose name or
-path matches the pattern(s) will be displayed.
+`show` must be followed by one or more globs.  The contens of any file 
+whose name or path matches the pattern(s) will be displayed.  In other
+words, this information will be sent to `stdout`, which may of course
+be directed to a file.
 
 ### drop
 
-The `drop` command deletes any items matching the file name patter(s)
+The `drop` command deletes any items matching the file name pattern(s)
 following from the store.  This action is irrevocable.  
 
 ### addPeer
