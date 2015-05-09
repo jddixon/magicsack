@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+0.2.1
+    2015-05-08
+        * documentation updates                                     SLOC  185
 0.2.0
     2014-12-15
         * convert to Python 3                                       SLOC  185

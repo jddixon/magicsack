@@ -2,7 +2,7 @@
 
 
 Magicsack is a utility for storing secret things either locally (on the
-laptop or workstation) or over a distributed set of cooperating servers
+user's laptop or workstation) or over a distributed set of cooperating servers
 or on one of the cloud services.
 
 Magicksack is in development using Python 3 on Linux.  This should 
@@ -11,8 +11,8 @@ until the development version is stable on Linux.
 
 ## Technical Details
 
-Magicksack is protected by a user-selected passphrase.  This is hased
-using SHA256 and then the first 256 bits of the hash are used as an AES
+Magicksack is protected by a user-selected passphrase.  This is hashed
+using SHA256 and then the 256 bits of the hash are used as an AES
 key.  When documents are added to the system, the user supplies a unique
 name and then the document is AES-encrypted using that key before storage.
 It should be possible to generate a different key for each document.  The
@@ -21,21 +21,27 @@ locally.  The encrypted documents may be stored locally or on one or more
 cooperating servers or on a cloud service or any combination of the 
 three.  The index is always AES-encrypted before being stored.  
 
-The system generates two 2048-bit RSA keypairs.  One of these is used
+The system generates two 2048-bit RSA keypairs.  One of these, **skPriv**,
+is used
 for creating digital signatures; specifically it is used for signing 
-the index.  The other is used for encrypting data such as the documents
-to be stored in the magicsack.
+the index.  The other, **ckPriv**, is used for encrypting data while
+setting up communications with **peers**, hosts cooperating with 
+`magicsack` in the storage of documents.
 
 ## Command Line
 
-magicsack init [-f] [-u U_Dir]
-magicsack destroy
-magicsack add      FILE [FILE]*
-magicsack list     [FILE [FILE]*]
-magicsack drop     FILE [FILE]*
-magicsack addPeer  FQDN[:PORT] [FQDN[:PORT]]*
-magicsack listPeer FQDN
-magicsack dropPeer FQDN[:PORT] [FQDN[:PORT]]*
+	magicsack init [-f] [-u U_Dir]
+	magicsack destroy
+	magicsack add      FILE [FILE]*
+	magicsack list     [FILE [FILE]*]
+	magicsack show     FILE [FILE]*
+	magicsack drop     FILE [FILE]*
+	magicsack addPeer  FQDN[:PORT] [FQDN[:PORT]]*
+	magicsack listPeer FQDN
+	magicsack dropPeer FQDN[:PORT] [FQDN[:PORT]]*
+
+Each of these commands asks for the passphrase.  Except in the case
+of `init`, if the passphrase is wrong, the command will have no effect.
 
 ### init
 
@@ -51,6 +57,10 @@ for all information stored.
 
 This command is destructive.  Any existing information under `.magicsack` 
 will be irrevocably deleted.
+
+If data is to be stored on the cloud, `uDir` **must** be specified and
+should be the path to a directory backed up on the cloud.  If that 
+directory does not exist, `magicsack` will attempt to create it
 
 ### destroy
 
@@ -71,6 +81,15 @@ This is not a destructive operation.
 the entire contents of the magicksack store will be listed.  Otherwise
 any file matching the pattern will be listed
 
+The listing contains only information about the document(s) requested, 
+most importantly the document name (which may be a path) and size,
+where the size is the size before encryption.  
+
+### show
+
+`show` must be followed by one or more globs.  Any file whose name or
+path matches the pattern(s) will be displayed.
+
 ### drop
 
 The `drop` command deletes any items matching the file name patter(s)
@@ -81,6 +100,19 @@ following from the store.  This action is irrevocable.
 This command adds a remote host (another machine that can be reached 
 over the Internet) to the list of cooperating servers.  FQDN may be
 either a domain name or an IP address, a **dotted quad** like 1.2.3.4.
-Either may optionally be followed by a port number.  
+Either may optionally be followed by a port number. 
+
+### listPeer
+
+Lists domain name or IP address and port number where the name
+matches `FQDN` (a glob).  If `FQDN` is not present on the command line,
+all such peers are listed.
+
+### dropPeer
+
+Drops peers matching FQDN from the local list of cooperating peers.  This
+should be an eventually destructive act: the remote peers will at some 
+point remove the data stored there, but there is no guarantee when this
+will occur.  (Remember that all data stored remotely is encrypted.)
 
 
