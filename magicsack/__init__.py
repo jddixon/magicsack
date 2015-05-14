@@ -7,8 +7,8 @@ __all__ = [ '__version__', '__version_date__',
             'stripPKCS7Padding',
           ]
 
-__version__      = '0.2.2'
-__version_date__ = '2015-05-09'
+__version__      = '0.2.3'
+__version_date__ = '2015-05-14'
 
 # OTHER EXPORTED CONSTANTS
 

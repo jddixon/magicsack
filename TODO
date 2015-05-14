@@ -4,7 +4,7 @@
     * handleInit() needs
         (a) loop: assess strength of password, repeat unless
             user says OK
-        (b) loop: compare passphrase app2, repeat unless same
+        (b) loop: compare passphrase app2, repeat unless same           * DONE
         (c) if $HOME/.magicsack exists 
                 read config file for existingUDir
                 if force

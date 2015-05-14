@@ -2,12 +2,13 @@
 #
 # ~/dev/py/magicsack/magicSack
 
-from argparse   import ArgumentParser
-from magicsack  import *
-
-import getpass, os, sys
-from pbkdf2         import crypt, PBKDF2   # note name of package is l/c
+import getpass, os, re, sys
+from pbkdf2         import crypt, PBKDF2   # note name of package is u/c
 from Crypto.Cipher  import AES
+from argparse       import ArgumentParser
+from distutils.util import strtobool
+from magicsack      import *
+
 
 def makeListing(args):
 
@@ -24,25 +25,101 @@ def verifyPassPhrase(passPhrase):
     # XXX STUB XXX
     return ok
 
+def confirm(prompt, default='y'):
+    doIt = False
+    while True:
+        reply = raw_input(prompt)
+        if reply == '':
+            reply = default
+        try:
+            doIt = strtobool(reply)
+            break
+        except ValueError:
+            print("please type 'y' or 'n'")
+    return doIt
+
 def handleInit(passPhrase):
+
+    # XXX loop: assess strength
+    def strength(p):
+        """ 
+        Return a crude estimate of strength, a string.
+
+        This should be improved by eg penalizing dictionary words
+        and sequences of identical ('0000...') or ascending ('abc...")
+        or descending ('zyxw...') characters.  This will be expensive
+        but password changes should be infrequent.  The improved 
+        password strength estimator should then be moved into s 
+        separate package.
+        """
+
+        if not p:
+            p = ''
+        length = len(p)
+        if length == 0:
+            est = 'empty password'
+        elif length < 6:
+            est = 'too short'
+        elif re.search(r'password', p, re.IGNORECASE):
+            est = 'contains dictionary word'
+        else:
+            if length > 16:             length = 16 
+            charSetSize = 0
+            if re.search(r'[a-z]', p):  charSetSize += 26
+            if re.search(r'[A-Z]', p):  charSetSize += 26
+            if re.search(r'\d',    p):  charSetSize += 10
+            if re.search(r'[^\w]', p):  charSetSize += 16  # say ;-)
+
+            if length >= 12:
+                if charSetSize >= 52:   est = 'very strong'
+                else:                   est = 'strong'
+            elif length >= 10:
+                if charSetSize >= 52:   est = 'strong'
+                else:                   est = 'medium'
+            elif length >= 8:
+                if charSetSize >= 52:   est = 'medium'
+                else:                   est = 'fair'
+            else:
+                if charSetSize >= 78:   est = 'fair'
+                elif charSetSize >= 52: est = 'poor'
+                else:                   est = 'weak'
+
+            # DEBUG
+            print("length %d, charSetSize %d: %s" % (
+                length, charSetSize, est))
+            # END
+
+        return est
+
+    while True:
+        print("passphrase is %s" % strength(passPhrase))
+        if confirm('ok to continue? '):
+            break
+        passPhrase = getpass.getpass('new passphrase: ')
+        if not passPhrase or passPhrase == '':
+            print('you must supply a passphrase')
+            sys.exit(1)
+
     salt    = os.urandom(8)
     key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
     iv      = os.urandom(16)                        # 16-byte IV
     cipher  = AES.new(key, AES.MODE_CBC, iv)
-    pp2     = getpass.getpass("Confirm passphrase: ")
-
     pwHash  = crypt(key)
 
+    # XXX loop: verify that second passphrase matches first
+    pp2     = getpass.getpass("Confirm passphrase: ")
+    while pp2 != passPhrase:
+        # DEBUG
+        print "passphrase: %s" % passPhrase
+        print "pp2:        %s" % pp2
+        # END
+        print("passphrase does not match confirmation")
+        pp2 = getpass.getpass("Confirm passphrase: ")
+
     # DEBUG
-    print "passphrase: %s" % passPhrase
-    print "pp2:        %s" % pp2
     print "PW_HASH: %s" % pwHash
-
-    if pp2 != passPhrase:
-        print "oh, learn how to type, dummy!"
-
     # END
-    
+
     DESC = 'initialize magickSack'
     parser = ArgumentParser(description=DESC)
     parser.add_argument('-f', '--force', action='store_true',

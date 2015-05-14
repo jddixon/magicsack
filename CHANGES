@@ -1,6 +1,9 @@
 ~/dev/py/magicsack/CHANGES
 
 0.2.2
+    2015-05-14
+        * draft password strength assessor
+        * loops to accept strength, confirm password                SLOC  285
     2015-05-13
         * skeletal init subcommand                                  SLOC  221
 0.2.1
