@@ -1,12 +1,22 @@
 ~/dev/py/magicksack/TODO
 
-2014-11-07
-    * clone in ~/dev/gh-pages/magicksack, then orphan                   * DONE
-    IN ~/dev/py/magicsack
-    * sdMigrate magicsack								                * DONE
-    * saveOldGits								                        * DONE
-    * sdPreen magicsack                                                 * DONE
+2015-05-13
+    * handleInit() needs
+        (a) loop: assess strength of password, repeat unless
+            user says OK
+        (b) loop: compare passphrase app2, repeat unless same
+        (c) if $HOME/.magicsack exists 
+                read config file for existingUDir
+                if force
+                    rm -r .magicsack
+                    if existingUDir not under ./magicksack 
+                else # not force
+                    if existing .magicksack or existingUDir
+                        abort
+                    else
+                        rm -r .magicsack
+                        if existingUDir not under ./magicksack 
+
 
 2014-10-02
-    * see sharedev/README for things to do -- splitting, etc
     * consider option to store in S3

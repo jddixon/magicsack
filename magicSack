@@ -11,125 +11,141 @@ from Crypto.Cipher  import AES
 
 def makeListing(args):
 
-    # this is here because assignment of args.uDir to None fails
-    if args.uDir and args.uDir != "":
-        uDir = args.uDir
-    else:
-        uDir = None
-
     testing     = args.testing
     uDir        = args.uDir
     verbose     = args.verbose
 
     # XXX STUB XX
 
-def reinit(args, passPhrase):
-        salt    = os.urandom(8)
-        key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
-        iv      = os.urandom(16)                    # 16-byte IV
-        cipher  = AES.new(key, AES.MODE_CBC, iv)
-        pp2     = getpass.getpass("Confirm passphrase: ")
 
-        pwHash  = crypt(key)
-
-        # DEBUG
-        print "PW_HASH: " + pwHash
-        print "PW_HASH: %s" % pwHash
-
-        if pp2 != passPhrase:
-            print "oh, learn how to type, dummy!"
-
-        # END
-
-        # if everything is OK we write ppHash to /var/app/magicSack/ppHash,
-        # unless of course we are testing
-
-def verifyPassPhrase(args, passPhrase):
-    # apps directory must exist
+def verifyPassPhrase(passPhrase):
+    ok = True
+    # .magicsack directory must exist
     # XXX STUB XXX
-    pass
+    return ok
 
-def main():
-    """
-    Expect a command like
-        magicSack [options] 
+def handleInit(passPhrase):
+    salt    = os.urandom(8)
+    key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
+    iv      = os.urandom(16)                        # 16-byte IV
+    cipher  = AES.new(key, AES.MODE_CBC, iv)
+    pp2     = getpass.getpass("Confirm passphrase: ")
 
-    """
+    pwHash  = crypt(key)
 
-    passPh = getpass.getpass('Passphrase: ')
-    if not passPh or passPh == '':
-        print 'you must supply a passphrase'
-        sys.exit(1)
     # DEBUG
+    print "passphrase: %s" % passPhrase
+    print "pp2:        %s" % pp2
+    print "PW_HASH: %s" % pwHash
+
+    if pp2 != passPhrase:
+        print "oh, learn how to type, dummy!"
+
     # END
     
-    # program defaults ----------------------------------------------
-
-    # parse the command line ----------------------------------------
-    
-    DESC = 'utility for managing (possibly distributed) encrypted files'
+    DESC = 'initialize magickSack'
     parser = ArgumentParser(description=DESC)
-
-    parser.add_argument('-i', '--initializing', action='store_true',
-        help='changing passphrase')
-
+    parser.add_argument('-f', '--force', action='store_true',
+        help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
         help='show options and exit')
-
     parser.add_argument('-T', '--testing', action='store_true',
         help='this is a test run')
-
     parser.add_argument('-u', '--uDir', 
         help='path to uDir (relative to tmp/ if testing)')
-
-    parser.add_argument('-v', '--verbose', action='store_true',
+    parser.add_argument('-v', '--verbose',  action='store_true',
         help='be chatty')
-
     args = parser.parse_args()
-
-    # reinitializing ------------------------------------------------
-    if args.initializing:
-        reinit(args, passPh)
-    else:
-        verifyPassPhrase(args, passPh)
-    # otherwise, apps directory must exist
-    # XXX STUB XXX
-
-    # fixups --------------------------------------------------------
-
-    # sanity checks -------------------------------------------------
-
-    # fixups --------------------------------------------------------
-
-    # uDir ------------------------------------------------
-    if args.testing and args.uDir:
-        if args.uDir[0] == '/':
-            args.uDir = args.uDir[1:]
-        args.uDir = os.path.join('tmp', args.uDir)
-
-    # complete setup ------------------------------------------------
+    
     appName = 'magicSack %s' % __version__
 
-    # maybe show options and such -----------------------------------
     if args.verbose or args.justShow:
         print "%s %s" % (appName, __version_date__)
 
     if args.verbose or args.justShow:
+        # DEBUG
+        print "passphrase   = " + str(passPhrase)
+        # END
         print 'testing      = ' + str(args.testing)
         print 'uDir         = ' + str(args.uDir)
         print 'verbose      = ' + str(args.verbose)
-
-        # DEBUG
-        # END
-        print "passphrase   = " + str(passPh)
 
     if args.justShow:
         sys.exit(0)
 
     # do what's required --------------------------------------------
-    makeListing(args)
+    # if everything is OK we write ppHash to $HOME/magicsack/ppHash
+    # unless of course we are testing
+    
+    print('init: not yet implemented')
+    sys.exit(0)
 
-        
+def handleDestroy():
+    print('destroy: not yet implemented')
+    sys.exit(0)
+
+def handleAdd():
+    print('add: not yet implemented')
+    sys.exit(0)
+
+def handleList():
+    print('list: not yet implemented')
+    sys.exit(0)
+
+def handleShow():
+    print('show: not yet implemented')
+    sys.exit(0)
+
+def handleDrop():
+    print('drop: not yet implemented')
+    sys.exit(0)
+
+def handleAddPeer():
+    print('addPeer: not yet implemented')
+    sys.exit(0)
+
+def handleListPeer():
+    print('listPeer: not yet implemented')
+    sys.exit(0)
+
+def handleDropPeer():
+    print('dropPeer: not yet implemented')
+    sys.exit(0)
+
+def main():
+    if len(sys.argv) < 2:
+        print("no command present: expect init, destroy, add, ...")
+        sys.exit(1)
+    command = sys.argv[1]
+    if len(sys.argv) == 2:
+        sys.argv = sys.argv[0:1]
+    else:
+        sys.argv = [sys.argv[0]] + sys.argv[2:]
+
+    passPhrase = getpass.getpass('passphrase: ')
+    if not passPhrase or passPhrase == '':
+        print('you must supply a passphrase')
+        sys.exit(1)
+
+    if command   == 'init':         
+        handleInit(passPhrase)
+    else:
+        # verifyPassPhrase
+        if not verifyPassPhrase(passPhrase):
+            print('that was not the right passphrase!')
+            sys.exit(1)
+        if command == 'destroy':      handleDestroy()
+        elif command == 'add':          handleAdd()
+        elif command == 'list':         handleList()
+        elif command == 'show':         handleShow()
+        elif command == 'drop':         handleDrop()
+        elif command == 'addPeer':      handleAddPeer()
+        elif command == 'listPeer':     handleListPeer()
+        elif command == 'dropPeer':     handleDropPeer()
+        else:
+            print("unrecogized command '%s'" % command)
+            sys.exit(1)
+
 if __name__ == '__main__':
     main()
 
