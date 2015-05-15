@@ -1,9 +1,14 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-14
+    * FIX: testPKCS7.py fails                                           * DONE
+    * crypto functions (pkcs7padding, test, etc) should be moved        * DONE
+        to xlattice_py.crypto                                           * DONE
+
 2015-05-13
     * handleInit() needs
-        (a) loop: assess strength of password, repeat unless
-            user says OK
+        (a) loop: assess strength of password, repeat unless            * DONE
+            user says OK                                                * DONE
         (b) loop: compare passphrase app2, repeat unless same           * DONE
         (c) if $HOME/.magicsack exists 
                 read config file for existingUDir
@@ -16,7 +21,6 @@
                     else
                         rm -r .magicsack
                         if existingUDir not under ./magicksack 
-
 
 2014-10-02
     * consider option to store in S3
