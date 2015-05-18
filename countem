@@ -1,3 +1,7 @@
 cd /home/jdd/dev/py/magicsack
 rm -rf build
-pySloc countem MANIFEST.in  magicSack
+pySloc -v \
+    bash:countem    \
+    txt:MANIFEST.in \
+    py:magicSack    \
+    $@

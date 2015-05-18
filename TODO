@@ -1,5 +1,8 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-18
+    * need function to insert subcommand name into help message
+
 2015-05-14
     * FIX: testPKCS7.py fails                                           * DONE
     * crypto functions (pkcs7padding, test, etc) should be moved        * DONE
@@ -15,12 +18,14 @@
                 if force
                     rm -r .magicsack
                     if existingUDir not under ./magicksack 
+                        ??
                 else # not force
                     if existing .magicksack or existingUDir
                         abort
                     else
                         rm -r .magicsack
                         if existingUDir not under ./magicksack 
+                            ??
 
 2014-10-02
     * consider option to store in S3
