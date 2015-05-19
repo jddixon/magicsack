@@ -1,18 +1,49 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-18 (includes edited bits from -05-13)
+    INIT
+    * need to generate two RSA 2048-bit private keys in PEM format		* DONE
+        (skPriv and ckPriv)		                                        * DONE
+    * these get AES-encrypted using the user's AES key and written		* DONE
+        to .magicsack -- that is, to uDir		                        * DONE
+        - these adds initialize the BuildList		                    * DONE
+    * need routine to generate build list, encrypt it, and write it
+        to disk
+    * and the reverse function to read the build list from disk,
+        decrypt it
+        - this needs to be done with care, because the only mapping
+            from file names to disk representation in the BuildList
+
+    ADD
+    * need library functions 
+        - login using passphrase, from which system determines key
+        - read existing BuildList
+    * create copy of BUildList
+    * find the file(s) being added, encrypt each, add to uDir, 
+        updating copy with each operation
+    * encrypt new BuildList, write to disk, rename the files so 
+        replacement is semi-atomic operation
+
+    LIST
+    * login, get key, read BuildList as above
+    * display as required
+    * no further interaction with store
+
+
 2015-05-18
-    * need function to insert subcommand name into help message
+    * need function to insert subcommand name into help message         * DONE
 
 2015-05-14
     * FIX: testPKCS7.py fails                                           * DONE
     * crypto functions (pkcs7padding, test, etc) should be moved        * DONE
         to xlattice_py.crypto                                           * DONE
 
+2014-10-02
+    * consider option to store in S3
+
+# JUNK
 2015-05-13
     * handleInit() needs
-        (a) loop: assess strength of password, repeat unless            * DONE
-            user says OK                                                * DONE
-        (b) loop: compare passphrase app2, repeat unless same           * DONE
         (c) if $HOME/.magicsack exists 
                 read config file for existingUDir
                 if force
@@ -27,5 +58,3 @@
                         if existingUDir not under ./magicksack 
                             ??
 
-2014-10-02
-    * consider option to store in S3

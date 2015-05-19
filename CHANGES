@@ -1,5 +1,9 @@
 ~/dev/py/magicsack/CHANGES
 
+0.2.6
+    2015-05-19
+        * G: index.html updated                                     SLOC  206
+        * P: private keys created, encrypted; added --title option  SLOC  249
 0.2.5
     2015-05-18
         * init creates .magicsack/cfg.json                          SLOC  206

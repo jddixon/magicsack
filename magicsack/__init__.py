@@ -3,8 +3,8 @@
 __all__ = [ '__version__', '__version_date__',
           ]
 
-__version__      = '0.2.5'
-__version_date__ = '2015-05-18'
+__version__      = '0.2.6'
+__version_date__ = '2015-05-19'
 
 # OTHER EXPORTED CONSTANTS
 

@@ -1,6 +1,7 @@
 cd /home/jdd/dev/py/magicsack
 rm -rf build
 pySloc -v \
+    txt:.gitignore  \
     bash:countem    \
     txt:MANIFEST.in \
     py:magicSack    \

@@ -5,8 +5,12 @@
 import binascii, getpass, json, os, shutil, sys
 from pbkdf2         import PBKDF2       # note name of package is u/c
 from Crypto.Cipher  import AES
+from Crypto.Hash      import SHA        # presumably SHA1
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_PSS
 from argparse       import ArgumentParser
 
+from xlattice.crypto import AES_BLOCK_SIZE, pkcs7Padding, stripPKCS7Padding
 from xlattice.lfs   import mkdir_p
 from xlattice.ui    import confirmYorN, passwdStrength
 from magicsack      import *
@@ -70,6 +74,8 @@ def handleInit(passPhrase):
         help='select folder/directory (default=%s)' % defaultDir)
     parser.add_argument('-T', '--testing', action='store_true',
         help='this is a test run')
+    parser.add_argument('-t', '--title', type=str,
+        help='name of the magic sack (required)')
     parser.add_argument('-u', '--uDir', 
         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose',  action='store_true',
@@ -80,6 +86,7 @@ def handleInit(passPhrase):
 
     # fixups
     magicDir = args.magicDir
+    title    = args.title
     uDir     = args.uDir
 
     if args.testing:
@@ -111,6 +118,13 @@ def handleInit(passPhrase):
             sys.exit(1)
     else:
         mkdir_p(magicDir, 0o700)
+
+    # title -----------------------------------------------
+
+    if not title or title == '':
+        print('please supply a title, a name for your magic sack')
+        parser.print_help()
+        sys.exit(1)
 
     # uDir ------------------------------------------------
 
@@ -152,13 +166,16 @@ def handleInit(passPhrase):
         print('magicDir     = ' + str(magicDir))
         print('salt         = ' + str(intSalt))
         print('testing      = ' + str(args.testing))
+        print('title        = ' + str(title))
         print('uDir         = ' + str(args.uDir))
         print('verbose      = ' + str(args.verbose))
 
     if args.justShow:
         sys.exit(0)
 
-    # do what's required --------------------------------------------
+    # ACTION --------------------------------------------------------
+
+    # write configuration to magicDir ---------------------
     cfg = {'salt':intSalt, 'uDir':uDir}
     jCfg = json.dumps(cfg)
     # DEBUG
@@ -167,6 +184,38 @@ def handleInit(passPhrase):
     configFile = os.path.join(magicDir, 'cfg.json')
     with open(configFile, 'w') as f:
         f.write(jCfg)
+
+    # generate two 2048 bit RSA private keys --------------
+    ckPriv      = RSA.generate(2048)
+    ckPrivPem   = ckPriv.exportKey('PEM')
+    
+    skPriv      = RSA.generate(2048)
+    skPrivPem   = ckPriv.exportKey('PEM')
+    sk          = skPriv.publickey()
+
+    # encrypt keys using AES key --------------------------
+    iv          = os.urandom(16)                          # 16-byte IV
+    cipher      = AES.new(key, AES.MODE_CBC, iv)
+    padding     = pkcs7Padding(ckPrivPem, AES_BLOCK_SIZE)
+    ckPrivE     = cipher.encrypt(ckPrivPem + padding)
+
+    iv          = os.urandom(16) 
+    cipher      = AES.new(key, AES.MODE_CBC, iv)
+    padding     = pkcs7Padding(skPrivPem, AES_BLOCK_SIZE)
+    skPrivE     = cipher.encrypt(skPrivPem + padding)
+
+    # create an empty build list --------------------------
+
+    # XXX NEED tree, a MerkleTree with two entries
+    # tree = ...
+    # bld  = BuildList(title, sk, tree)
+
+    # add keys to build list (saving to uDir) -------------
+
+    # sign build list, encrypt, write to disk -------------
+
+
+
 
 def handleDestroy():
     print('destroy: not yet implemented')
