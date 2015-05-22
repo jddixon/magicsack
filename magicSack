@@ -2,11 +2,16 @@
 #
 # ~/dev/py/magicsack/magicSack
 
-import getpass, os, sys
-from pbkdf2         import crypt, PBKDF2   # note name of package is u/c
+import binascii, getpass, json, os, shutil, sys
+from pbkdf2         import PBKDF2       # note name of package is u/c
 from Crypto.Cipher  import AES
+from Crypto.Hash      import SHA        # presumably SHA1
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_PSS
 from argparse       import ArgumentParser
 
+from xlattice.crypto import AES_BLOCK_SIZE, pkcs7Padding, stripPKCS7Padding
+from xlattice.lfs   import mkdir_p
 from xlattice.ui    import confirmYorN, passwdStrength
 from magicsack      import *
 
@@ -26,77 +31,6 @@ def verifyPassPhrase(passPhrase):
     # XXX STUB XXX
     return ok
 
-# BEGIN MOVING TO XLATTICE_PY #######################################
-#def strength(p):
-#    """ 
-#    Return a crude estimate of strength, a string.
-#
-#    This should be improved by eg penalizing dictionary words
-#    and sequences of identical ('0000...') or ascending ('abc...")
-#    or descending ('zyxw...') characters.  This will be expensive
-#    but password changes should be infrequent.  The improved 
-#    password strength estimator should then be moved into s 
-#    separate package.
-#    """
-#
-#    if not p:
-#        p = ''
-#    length = len(p)
-#    if length == 0:
-#        est = 'empty password'
-#    elif length < 6:
-#        est = 'too short'
-#    elif re.search(r'password', p, re.IGNORECASE):
-#        est = 'contains dictionary word'
-#    else:
-#        if length > 16:             length = 16 
-#        charSetSize = 0
-#        if re.search(r'[a-z]', p):  charSetSize += 26
-#        if re.search(r'[A-Z]', p):  charSetSize += 26
-#        if re.search(r'\d',    p):  charSetSize += 10
-#        if re.search(r'[^\w]', p):  charSetSize += 16  # say ;-)
-#
-#        if length >= 12:
-#            if charSetSize >= 52:   est = 'very strong'
-#            else:                   est = 'strong'
-#        elif length >= 10:
-#            if charSetSize >= 52:   est = 'strong'
-#            else:                   est = 'medium'
-#        elif length >= 8:
-#            if charSetSize >= 52:   est = 'medium'
-#            else:                   est = 'fair'
-#        else:
-#            if charSetSize >= 78:   est = 'fair'
-#            elif charSetSize >= 52: est = 'poor'
-#            else:                   est = 'weak'
-#
-#        # DEBUG
-#        print(("length %d, charSetSize %d: %s" % (
-#            length, charSetSize, est)))
-#        # END
-#
-#    return est
-#
-#def confirmYorN(prompt, default='y'):
-#    """
-#    Prompt for agreement to continue.  Any default should be one of
-#    'y', 'n', 'yes', 'no', etc.
-#    """
-#    doIt = False 
-#    prompt = "%s (default = '%s')" % (prompt, default)
-#    while True:
-#        reply = input(prompt)
-#        if reply == '':
-#            reply = default
-#        try:
-#            doIt = strtobool(reply)
-#            break
-#        except ValueError:
-#            print("please type 'y' or 'n'")
-#    return doIt
-#
-## END MOVING TO XLATTICE_PY #########################################
-
 def handleInit(passPhrase):
 
     while True:
@@ -108,11 +42,11 @@ def handleInit(passPhrase):
             print('you must supply a passphrase')
             sys.exit(1)
 
+    # Neither the salt nor any IVs need be kept secret.
     salt    = os.urandom(8)
     key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
-    iv      = os.urandom(16)                        # 16-byte IV
-    cipher  = AES.new(key, AES.MODE_CBC, iv)
-    pwHash  = crypt(key)
+    # iv    = os.urandom(16)                        # 16-byte IV
+    # cipher= AES.new(key, AES.MODE_CBC, iv)
 
     # loop: verify that second passphrase matches first
     pp2     = getpass.getpass("Confirm passphrase: ")
@@ -125,17 +59,23 @@ def handleInit(passPhrase):
         pp2 = getpass.getpass("Confirm passphrase: ")
 
     # DEBUG
-    print("PW_HASH: %s" % pwHash)
+    print("key: %s" % binascii.b2a_hex(key))
     # END
 
+    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
+
     DESC = 'initialize magickSack'
-    parser = ArgumentParser(description=DESC)
+    parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
     parser.add_argument('-f', '--force', action='store_true',
         help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
         help='show options and exit')
+    parser.add_argument('-m', '--magicDir', default=defaultDir,
+        help='select folder/directory (default=%s)' % defaultDir)
     parser.add_argument('-T', '--testing', action='store_true',
         help='this is a test run')
+    parser.add_argument('-t', '--title', type=str,
+        help='name of the magic sack (required)')
     parser.add_argument('-u', '--uDir', 
         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose',  action='store_true',
@@ -144,23 +84,138 @@ def handleInit(passPhrase):
     
     appName = 'magicSack %s' % __version__
 
+    # fixups
+    magicDir = args.magicDir
+    title    = args.title
+    uDir     = args.uDir
+
+    if args.testing:
+        if magicDir == defaultDir:
+            magicDir = os.path.join('tmp', '.magicsack')
+        else:
+            magicDir = os.path.join('tmp', '.magicsack')
+
+    # sanity checks -------------------------------------------------
+
+    # magicDir --------------------------------------------
+    if not magicDir or magicDir == '':
+        print("magicDir must be specified")
+        sys.exit(1)
+    if magicDir[0] == '/':
+        print("magicDir is '%s' but may not be an absolute path" % magicDir)
+        sys.exit(1)
+    parts = magicDir.split('/')
+    for part in parts:
+        if part == '.' or part == '..':
+            print("magicDir path '%s' may not contain '%s'" % (magicDir, part))
+            sys.exit(1)
+
+    if os.path.exists(magicDir):
+        if args.force:
+            shutil.rmtree(magicDir)
+        else:
+            print('%s already exists, add -f to continue' % magicDir)
+            sys.exit(1)
+    else:
+        mkdir_p(magicDir, 0o700)
+
+    # title -----------------------------------------------
+
+    if not title or title == '':
+        print('please supply a title, a name for your magic sack')
+        parser.print_help()
+        sys.exit(1)
+
+    # uDir ------------------------------------------------
+
+    if not uDir or uDir == '':
+        uDir = os.path.join(magicDir, 'uDir')
+
+    if uDir[0] == '/':
+        print("uDir is '%s' but may not be an absolute path" % uDir)
+        sys.exit(1)
+    parts = uDir.split('/')
+    for part in parts:
+        if part == '.' or part == '..':
+            print("uDir path '%s' may not contain '%s'" % (uDir, part))
+            sys.exit(1)
+
+    if os.path.exists(uDir):
+        if args.force:
+            shutil.rmtree(uDir)
+        else:
+            print('%s already exists, add -f to continue' % uDir)
+            sys.exit(1)
+    else:
+        mkdir_p(uDir, 0o700)
+
+    # uDir/tmp --------------------------------------------
+    uDirTmp = os.path.join(uDir, 'tmp')
+    mkdir_p(uDirTmp, 0o700)
+
+    # convert key to something json can handle 
+    intSalt = int.from_bytes(salt, byteorder='little')
+    # int.to_bytes(length, byteorder) reverses
+
+    # echo back command line args -----------------------------------
+
     if args.verbose or args.justShow:
         print("%s %s" % (appName, __version_date__))
 
     if args.verbose or args.justShow:
+        print('magicDir     = ' + str(magicDir))
+        print('salt         = ' + str(intSalt))
         print('testing      = ' + str(args.testing))
+        print('title        = ' + str(title))
         print('uDir         = ' + str(args.uDir))
         print('verbose      = ' + str(args.verbose))
 
     if args.justShow:
         sys.exit(0)
 
-    # do what's required --------------------------------------------
-    # if everything is OK we write ppHash to $HOME/magicsack/ppHash
-    # unless of course we are testing
+    # ACTION --------------------------------------------------------
+
+    # write configuration to magicDir ---------------------
+    cfg = {'salt':intSalt, 'uDir':uDir}
+    jCfg = json.dumps(cfg)
+    # DEBUG
+    print("JSON: %s" % jCfg)
+    # END
+    configFile = os.path.join(magicDir, 'cfg.json')
+    with open(configFile, 'w') as f:
+        f.write(jCfg)
+
+    # generate two 2048 bit RSA private keys --------------
+    ckPriv      = RSA.generate(2048)
+    ckPrivPem   = ckPriv.exportKey('PEM')
     
-    print('init: not yet implemented')
-    sys.exit(0)
+    skPriv      = RSA.generate(2048)
+    skPrivPem   = ckPriv.exportKey('PEM')
+    sk          = skPriv.publickey()
+
+    # encrypt keys using AES key --------------------------
+    iv          = os.urandom(16)                          # 16-byte IV
+    cipher      = AES.new(key, AES.MODE_CBC, iv)
+    padding     = pkcs7Padding(ckPrivPem, AES_BLOCK_SIZE)
+    ckPrivE     = cipher.encrypt(ckPrivPem + padding)
+
+    iv          = os.urandom(16) 
+    cipher      = AES.new(key, AES.MODE_CBC, iv)
+    padding     = pkcs7Padding(skPrivPem, AES_BLOCK_SIZE)
+    skPrivE     = cipher.encrypt(skPrivPem + padding)
+
+    # create an empty build list --------------------------
+
+    # XXX NEED tree, a MerkleTree with two entries
+    # tree = ...
+    # bld  = BuildList(title, sk, tree)
+
+    # add keys to build list (saving to uDir) -------------
+
+    # sign build list, encrypt, write to disk -------------
+
+
+
 
 def handleDestroy():
     print('destroy: not yet implemented')
