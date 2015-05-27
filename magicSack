@@ -25,13 +25,13 @@ def makeListing(args):
     # XXX STUB XX
 
 
-def verifyPassPhrase(passPhrase):
+def verifyPassPhrase(globals, passPhrase):
     ok = True
     # .magicsack directory must exist
     # XXX STUB XXX
     return ok
 
-def handleInit(passPhrase):
+def handleInit(globals, passPhrase):
 
     while True:
         print(("passphrase is %s" % passwdStrength(passPhrase)))
@@ -62,30 +62,25 @@ def handleInit(passPhrase):
     print("key: %s" % binascii.b2a_hex(key))
     # END
 
-    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
-
     DESC = 'initialize magickSack'
     parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
     parser.add_argument('-f', '--force', action='store_true',
         help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
         help='show options and exit')
-    parser.add_argument('-m', '--magicDir', default=defaultDir,
-        help='select folder/directory (default=%s)' % defaultDir)
     parser.add_argument('-T', '--testing', action='store_true',
         help='this is a test run')
     parser.add_argument('-t', '--title', type=str,
         help='name of the magic sack (required)')
-    parser.add_argument('-u', '--uDir', 
+    parser.add_argument('-u', '--uDir',
         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose',  action='store_true',
         help='be chatty')
     args = parser.parse_args()
-    
-    appName = 'magicSack %s' % __version__
 
     # fixups
-    magicDir = args.magicDir
+    appName  = globals.appName
+    magicDir = globals.magicDir
     title    = args.title
     uDir     = args.uDir
 
@@ -98,12 +93,6 @@ def handleInit(passPhrase):
     # sanity checks -------------------------------------------------
 
     # magicDir --------------------------------------------
-    if not magicDir or magicDir == '':
-        print("magicDir must be specified")
-        sys.exit(1)
-    if magicDir[0] == '/':
-        print("magicDir is '%s' but may not be an absolute path" % magicDir)
-        sys.exit(1)
     parts = magicDir.split('/')
     for part in parts:
         if part == '.' or part == '..':
@@ -131,9 +120,6 @@ def handleInit(passPhrase):
     if not uDir or uDir == '':
         uDir = os.path.join(magicDir, 'uDir')
 
-    if uDir[0] == '/':
-        print("uDir is '%s' but may not be an absolute path" % uDir)
-        sys.exit(1)
     parts = uDir.split('/')
     for part in parts:
         if part == '.' or part == '..':
@@ -153,7 +139,7 @@ def handleInit(passPhrase):
     uDirTmp = os.path.join(uDir, 'tmp')
     mkdir_p(uDirTmp, 0o700)
 
-    # convert key to something json can handle 
+    # convert key to something json can handle
     intSalt = int.from_bytes(salt, byteorder='little')
     # int.to_bytes(length, byteorder) reverses
 
@@ -177,7 +163,7 @@ def handleInit(passPhrase):
 
     # write configuration to magicDir ---------------------
     cfg = {'salt':intSalt, 'uDir':uDir}
-    jCfg = json.dumps(cfg)
+    jCfg = json.dumps(cfg, indent=2, sort_keys=True)
     # DEBUG
     print("JSON: %s" % jCfg)
     # END
@@ -188,7 +174,7 @@ def handleInit(passPhrase):
     # generate two 2048 bit RSA private keys --------------
     ckPriv      = RSA.generate(2048)
     ckPrivPem   = ckPriv.exportKey('PEM')
-    
+
     skPriv      = RSA.generate(2048)
     skPrivPem   = ckPriv.exportKey('PEM')
     sk          = skPriv.publickey()
@@ -199,7 +185,7 @@ def handleInit(passPhrase):
     padding     = pkcs7Padding(ckPrivPem, AES_BLOCK_SIZE)
     ckPrivE     = cipher.encrypt(ckPrivPem + padding)
 
-    iv          = os.urandom(16) 
+    iv          = os.urandom(16)
     cipher      = AES.new(key, AES.MODE_CBC, iv)
     padding     = pkcs7Padding(skPrivPem, AES_BLOCK_SIZE)
     skPrivE     = cipher.encrypt(skPrivPem + padding)
@@ -217,68 +203,170 @@ def handleInit(passPhrase):
 
 
 
-def handleDestroy():
+def handleDestroy(globals):
     print('destroy: not yet implemented')
     sys.exit(0)
 
-def handleAdd():
-    print('add: not yet implemented')
+def handleAdd(globals):
+
+    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
+
+    DESC = 'add something to magickSack'
+    parser = ArgumentParser(description=DESC, usage='magicSack add [options]')
+    parser.add_argument('-f', '--force', action='store_true',
+        help='overwrite any existing configuration')
+    parser.add_argument('-j', '--justShow', action='store_true',
+        help='show options and exit')
+    parser.add_argument('-T', '--testing', action='store_true',
+        help='this is a test run')
+    parser.add_argument('-v', '--verbose',  action='store_true',
+        help='be chatty')
+    args = parser.parse_args()
+
+    # fixups
+    magicDir = args.magicDir
+    if args.testing:
+        if magicDir == defaultDir:
+            magicDir = os.path.join('tmp', '.magicsack')
+        else:
+            magicDir = os.path.join('tmp', '.magicsack')
+
+    # echo back command line args -----------------------------------
+
+    appName = 'magicSack %s' % __version__
+    if args.verbose or args.justShow:
+        print("%s %s" % (appName, __version_date__))
+
+    if args.verbose or args.justShow:
+        print('justShow     = ' + str(args.justShow))
+        print('magicDir     = ' + str(magicDir))
+        print('testing      = ' + str(args.testing))
+        print('verbose      = ' + str(args.verbose))
+
+    if args.justShow:
+        sys.exit(0)
+
+    # ACTION --------------------------------------------------------
+
+    # XXX WORKING HERE
+
+    print('add: not yet completelyimplemented')
     sys.exit(0)
 
-def handleList():
+def handleList(globals):
     print('list: not yet implemented')
     sys.exit(0)
 
-def handleShow():
+def handleShow(globals):
     print('show: not yet implemented')
     sys.exit(0)
 
-def handleDrop():
+def handleDrop(globals):
     print('drop: not yet implemented')
     sys.exit(0)
 
-def handleAddPeer():
+def handleAddPeer(globals):
     print('addPeer: not yet implemented')
     sys.exit(0)
 
-def handleListPeer():
+def handleListPeer(globals):
     print('listPeer: not yet implemented')
     sys.exit(0)
 
-def handleDropPeer():
+def handleDropPeer(globals):
     print('dropPeer: not yet implemented')
     sys.exit(0)
 
 def main():
-    if len(sys.argv) < 2:
-        print("no command present: expect init, destroy, add, ...")
+
+    #   'globals' is the list of global args
+    #   'command' is the first token after that
+    #   'subArgs' is a list containing any other arguments found
+    # So
+    #   sys.args = [sys.argv[0]] + otherArgs
+
+    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
+
+    DESC = 'command-line interface to the Magic Sack'
+    parser = ArgumentParser(description=DESC, usage='magicSack add [options]')
+    parser.add_argument('-j', '--justShow', action='store_true',
+        help='show options and exit')
+    parser.add_argument('-m', '--magicDir', default=defaultDir,
+        help='select folder/directory (default=%s)' % defaultDir)
+    parser.add_argument('-T', '--testing', action='store_true',
+        help='this is a test run')
+    parser.add_argument('-v', '--verbose',  action='store_true',
+        help='be chatty')
+    parser.add_argument('subCommand',
+        help='subCommand to be executed')
+    parser.add_argument('subArgs', nargs='*',
+        help='arguments to subCommand')
+    globals = parser.parse_args()
+
+    # fixups
+    magicDir = globals.magicDir
+    if globals.testing:
+        if magicDir == defaultDir:
+            magicDir = os.path.join('tmp', '.magicsack')
+        else:
+            magicDir = os.path.join('tmp', '.magicsack')
+        globals.magicDir = magicDir
+    if not magicDir or magicDir == '':
+        print("magicDir must be specified")
         sys.exit(1)
-    command = sys.argv[1]
-    if len(sys.argv) == 2:
-        sys.argv = sys.argv[0:1]
-    else:
-        sys.argv = [sys.argv[0]] + sys.argv[2:]
+
+    # set up the subcommand line ------------------------------------
+    sys.argv = [globals.subCommand] + globals.subArgs
+
+    # echo back command line globals --------------------------------
+
+    globals.appName = 'magicSack %s' % __version__
+    if globals.verbose or globals.justShow:
+        print("%s %s" % (globals.appName, __version_date__))
+
+    if globals.verbose or globals.justShow:
+        print('appName      = ' + str(globals.appName))
+        print('justShow     = ' + str(globals.justShow))
+        print('magicDir     = ' + str(magicDir))
+        print('subCommand   = ' + str(globals.subCommand))
+        print('testing      = ' + str(globals.testing))
+        print('verbose      = ' + str(globals.verbose))
+        if globals.subArgs:
+            for x in globals.subArgs:
+                print('  %s' % x)
+        # DEBUG
+        print("modified sys.argv:")
+        for ndx, arg in enumerate(sys.argv):
+            print("  %d %s" % (ndx, arg))
+        # END
+
+    if globals.justShow:
+        sys.exit(0)
+
+    # DEBUG
+    sys.exit(0)
+    # END
 
     passPhrase = getpass.getpass('passphrase: ')
     if not passPhrase or passPhrase == '':
         print('you must supply a passphrase')
         sys.exit(1)
 
-    if command   == 'init':         
-        handleInit(passPhrase)
+    if command   == 'init':
+        handleInit(globals, passPhrase)
     else:
         # verifyPassPhrase
-        if not verifyPassPhrase(passPhrase):
+        if not verifyPassPhrase(globals, passPhrase):
             print('that was not the right passphrase!')
             sys.exit(1)
-        if command == 'destroy':      handleDestroy()
-        elif command == 'add':          handleAdd()
-        elif command == 'list':         handleList()
-        elif command == 'show':         handleShow()
-        elif command == 'drop':         handleDrop()
-        elif command == 'addPeer':      handleAddPeer()
-        elif command == 'listPeer':     handleListPeer()
-        elif command == 'dropPeer':     handleDropPeer()
+        if   command == 'destroy':  handleDestroy(globals)
+        elif command == 'add':      handleAdd(globals)
+        elif command == 'list':     handleList(globals)
+        elif command == 'show':     handleShow(globals)
+        elif command == 'drop':     handleDrop(globals)
+        elif command == 'addPeer':  handleAddPeer(globals)
+        elif command == 'listPeer': handleListPeer(globals)
+        elif command == 'dropPeer': handleDropPeer(globals)
         else:
             print(("unrecogized command '%s'" % command))
             sys.exit(1)
