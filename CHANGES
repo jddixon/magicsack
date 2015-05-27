@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+0.2.7
+    2015-05-27
+        * added top level argument parser                           SLOC  306
 0.2.6
     2015-05-19
         * G: index.html updated                                     SLOC  206

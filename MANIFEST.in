@@ -1,9 +1,11 @@
 # see http://docs.python.org/distutils/sourcedist.html
 
 include netDistrib.conf
-include CHANGES MANIFEST.in README TODO
+include countem installit
+include .gitignore CHANGES MANIFEST.in README.* TODO
 include magicSack
 recursive-include magicsack *.py
+recursive-include ghpDoc *
 global-exclude junk* .*swp 
 prune   .svn
 

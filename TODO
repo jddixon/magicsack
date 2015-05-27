@@ -1,5 +1,12 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-26
+    * modify magicSack to include a global argparser which handles
+        -m/--magicDir and -T/--testing
+        with these (and other selected args) being collected as 
+        a globals list;
+    * the command line is then reconstituted with these omitted
+
 2015-05-18 (includes edited bits from -05-13)
     INIT
     * need to generate two RSA 2048-bit private keys in PEM format		* DONE
@@ -30,31 +37,5 @@
     * no further interaction with store
 
 
-2015-05-18
-    * need function to insert subcommand name into help message         * DONE
-
-2015-05-14
-    * FIX: testPKCS7.py fails                                           * DONE
-    * crypto functions (pkcs7padding, test, etc) should be moved        * DONE
-        to xlattice_py.crypto                                           * DONE
-
 2014-10-02
     * consider option to store in S3
-
-# JUNK
-2015-05-13
-    * handleInit() needs
-        (c) if $HOME/.magicsack exists 
-                read config file for existingUDir
-                if force
-                    rm -r .magicsack
-                    if existingUDir not under ./magicksack 
-                        ??
-                else # not force
-                    if existing .magicksack or existingUDir
-                        abort
-                    else
-                        rm -r .magicsack
-                        if existingUDir not under ./magicksack 
-                            ??
-
