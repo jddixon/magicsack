@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+0.2.8
+    2015-05-28
+        * add generateKey, devisePuzzle, checkPuzzle, and test      SLOC  384
 0.2.7
     2015-05-27
         * added top level argument parser                           SLOC  306
