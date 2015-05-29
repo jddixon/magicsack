@@ -19,7 +19,7 @@
     * and the reverse function to read the build list from disk,
         decrypt it
         - this needs to be done with care, because the only mapping
-            from file names to disk representation in the BuildList
+            from file names to disk representation is the BuildList
 
     ADD
     * need library functions 
