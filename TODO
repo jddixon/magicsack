@@ -1,5 +1,10 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-28
+    * BUG IN ARGPARSE: subcommands cannot include options
+        if the primary command (magicSack in this case) has an
+        option with a variable number of arguments (the subArgs)
+
 2015-05-26
     * modify magicSack to include a global argparser which handles
         -m/--magicDir and -T/--testing

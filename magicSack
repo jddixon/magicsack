@@ -16,19 +16,41 @@ from xlattice.ui    import confirmYorN, passwdStrength
 from magicsack      import *
 
 
-def makeListing(args):
-
-    testing     = args.testing
-    uDir        = args.uDir
-    verbose     = args.verbose
-
-    # XXX STUB XX
-
-
 def verifyPassPhrase(globals, passPhrase):
+    # DEBUG
+    print("entering verifyPassPhrase")
+    print("globals is a ", type(globals))
+    # END
     ok = True
-    # .magicsack directory must exist
+    magicDir    = globals.magicDir
+    if not os.path.exists(magicDir):
+        print("%s does not exist; cannot continue" % magicDir)
+        sys.exit(1)
+    configFile = os.path.join(magicDir, 'cfg.json')
+    if not os.path.exists(configFile):
+        print("%s does not exist; cannot continue" % configFile)
+        sys.exit(1)
+    try:
+        with open(configFile, 'r') as f:
+            data = f.read()
+    except Exception as e:
+        print("error reading configuration file: %s" % e)
+        sys.exit(1)
+    try:
+        cfg = json.loads(data)
+    except Exception as e:
+        print("error parsing json configuration file: %s" % e)
+        sys.exit(1)
+    # DEBUG
+    print("CONFIGURATION:")
+    print(data)
+    # END
+    
+    globals.salt = cfg['salt']
+    globals.uDir = cfg['uDir']
+    
     # XXX STUB XXX
+   
     return ok
 
 def handleInit(globals, passPhrase):
@@ -209,10 +231,13 @@ def handleDestroy(globals):
 
 def handleAdd(globals):
 
-    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
+    # DEBUG
+    print("entering handleAdd")
+    # END
+
 
     DESC = 'add something to magickSack'
-    parser = ArgumentParser(description=DESC, usage='magicSack add [options]')
+    parser = ArgumentParser(description=DESC)
     parser.add_argument('-f', '--force', action='store_true',
         help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
@@ -224,12 +249,8 @@ def handleAdd(globals):
     args = parser.parse_args()
 
     # fixups
-    magicDir = args.magicDir
-    if args.testing:
-        if magicDir == defaultDir:
-            magicDir = os.path.join('tmp', '.magicsack')
-        else:
-            magicDir = os.path.join('tmp', '.magicsack')
+    magicDir    = globals.magicDir
+    verbose     = globals.verbose 
 
     # echo back command line args -----------------------------------
 
@@ -241,7 +262,7 @@ def handleAdd(globals):
         print('justShow     = ' + str(args.justShow))
         print('magicDir     = ' + str(magicDir))
         print('testing      = ' + str(args.testing))
-        print('verbose      = ' + str(args.verbose))
+        print('verbose      = ' + str(verbose))
 
     if args.justShow:
         sys.exit(0)
@@ -288,7 +309,7 @@ def main():
     defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
 
     DESC = 'command-line interface to the Magic Sack'
-    parser = ArgumentParser(description=DESC, usage='magicSack add [options]')
+    parser = ArgumentParser(description=DESC)
     parser.add_argument('-j', '--justShow', action='store_true',
         help='show options and exit')
     parser.add_argument('-m', '--magicDir', default=defaultDir,
@@ -297,9 +318,9 @@ def main():
         help='this is a test run')
     parser.add_argument('-v', '--verbose',  action='store_true',
         help='be chatty')
-    parser.add_argument('subCommand',
+    parser.add_argument('command',
         help='subCommand to be executed')
-    parser.add_argument('subArgs', nargs='*',
+    parser.add_argument('subArgs', nargs='+',
         help='arguments to subCommand')
     globals = parser.parse_args()
 
@@ -316,7 +337,13 @@ def main():
         sys.exit(1)
 
     # set up the subcommand line ------------------------------------
-    sys.argv = [globals.subCommand] + globals.subArgs
+    sys.argv = [globals.command] + globals.subArgs
+
+    # DEBUG
+    print("modified sys.argv:")
+    for ndx, arg in enumerate(sys.argv):
+        print("  %d %s" % (ndx, arg))
+    # END
 
     # echo back command line globals --------------------------------
 
@@ -326,36 +353,27 @@ def main():
 
     if globals.verbose or globals.justShow:
         print('appName      = ' + str(globals.appName))
+        print('command      = ' + str(globals.command))
         print('justShow     = ' + str(globals.justShow))
         print('magicDir     = ' + str(magicDir))
-        print('subCommand   = ' + str(globals.subCommand))
         print('testing      = ' + str(globals.testing))
         print('verbose      = ' + str(globals.verbose))
         if globals.subArgs:
             for x in globals.subArgs:
                 print('  %s' % x)
-        # DEBUG
-        print("modified sys.argv:")
-        for ndx, arg in enumerate(sys.argv):
-            print("  %d %s" % (ndx, arg))
-        # END
 
     if globals.justShow:
         sys.exit(0)
-
-    # DEBUG
-    sys.exit(0)
-    # END
 
     passPhrase = getpass.getpass('passphrase: ')
     if not passPhrase or passPhrase == '':
         print('you must supply a passphrase')
         sys.exit(1)
 
+    command = globals.command
     if command   == 'init':
         handleInit(globals, passPhrase)
     else:
-        # verifyPassPhrase
         if not verifyPassPhrase(globals, passPhrase):
             print('that was not the right passphrase!')
             sys.exit(1)
