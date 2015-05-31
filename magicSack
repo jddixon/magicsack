@@ -13,7 +13,7 @@ from argparse       import ArgumentParser
 from buildList      import BuildList
 from nlhtree        import NLHTree
 from rnglib         import SystemRNG
-from xlattice.crypto import AES_BLOCK_SIZE, pkcs7Padding, stripPKCS7Padding
+from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
 from xlattice.lfs   import mkdir_p
 from xlattice.ui    import confirmYorN, passwdStrength
 from magicsack      import *
@@ -84,7 +84,7 @@ def handleInit(globals, passPhrase):
 
     # Neither the salt nor any IVs need be kept secret.
     salt    = bytes(globals.rng.someBytes(16))
-    key     = PBKDF2(passPhrase, salt).read(32)     # 32-byte key
+    key     = bytes(PBKDF2(passPhrase, salt).read(32))     # 32-byte key
 
     # loop: verify that second passphrase matches first
     pp2     = getpass.getpass("Confirm passphrase: ")
@@ -192,22 +192,6 @@ def handleInit(globals, passPhrase):
     print("hexSalt = %s" % hexSalt)
     # END
 
-    # echo back command line args -----------------------------------
-
-    #if args.verbose or args.justShow:
-    #    print("%s %s" % (appName, __version_date__))
-
-    #if args.verbose or args.justShow:
-    #    print('magicDir     = ' + str(magicDir))
-    #    print('salt         = ' + str(hexSalt))
-    #    print('testing      = ' + str(args.testing))
-    #    print('title        = ' + str(title))
-    #    print('uDir         = ' + str(args.uDir))
-    #    print('verbose      = ' + str(args.verbose))
-
-    #if args.justShow:
-    #    sys.exit(0)
-
     # ACTION --------------------------------------------------------
 
     # write configuration to magicDir ---------------------
@@ -222,7 +206,7 @@ def handleInit(globals, passPhrase):
 
     # write the puzzle file -------------------------------
     puzzle       = devisePuzzle(passPhrase, salt, rng)
-    pathToPuzzle = os.path.join(magicDir, '.puzzle')
+    pathToPuzzle = os.path.join(magicDir, 'p')
     with open(pathToPuzzle, 'wb') as f:
         f.write(puzzle)
 
@@ -242,19 +226,10 @@ def handleInit(globals, passPhrase):
     tree        = NLHTree(title, usingSHA1)
     tree.insert(makeNamedValueLeaf(globals,'__ckPrivPem__', ckPrivPem))
     tree.insert(makeNamedValueLeaf(globals,'__skPrivPem__', skPrivPem))
-    
-    buildList = globals.buildList = BuildList(title, sk, tree)
-
-    # sign build list, encrypt, write to disk -------------
-    buildList.sign(skPriv)
-    s         = buildList.__str__()
-    padded    = addPKCS7Padding(s, AES_BLOCK_SIZE)
-    iv        = rng.someBytes(AES_BLOCK_SIZE)
-    cipher    = AES.new(key, AES_MODE_CBC, iv)
-    encrypted = cipher.encrypt(padded)
-    pathToBL  = os.path.join(magicDir, 'buildList')
-    with open(pathToBL, 'wb') as f:
-        f.write(encrypted)
+    globals.sk      = sk
+    globals.skPriv  = skPriv
+    globals.tree    = tree
+    writeBuildList(globals)
 
 
 def handleDestroy(globals):

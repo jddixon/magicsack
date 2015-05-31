@@ -1,12 +1,13 @@
 # magicsack/__in(it__.py
 
-import binascii, hashlib
+import binascii, hashlib, os
 
 from pbkdf2             import PBKDF2       # note name of package is u/c
 from Crypto.Cipher      import AES
 from Crypto.Hash        import SHA       
 from Crypto.PublicKey   import RSA
 
+from buildList          import BuildList
 from nlhtree            import NLHLeaf
 from xlattice           import u, SHA1_BIN_NONE, SHA2_BIN_NONE
 from xlattice.crypto    import (
@@ -15,10 +16,11 @@ from xlattice.crypto    import (
 __all__ = [ '__version__', '__version_date__',
             'generateKey', 'devisePuzzle', 'checkPuzzle',
             'makeNamedValueLeaf',
+            'writeBuildList',
           ]
 
-__version__      = '0.2.9'
-__version_date__ = '2015-05-29'
+__version__      = '0.2.10'
+__version_date__ = '2015-05-31'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -122,7 +124,8 @@ def insertNamedValue(globals, name, data):
     else:
         sha = hashlib.sha256()
     sha.update(encrypted)
-    hexHash = sha.hexdigest()
+    binHash = sha.digest()
+    hexHash = binascii.b2a_hex(binHash).decode('utf-8')
 
     # DEBUG
     print("len(encrypted) = %d" % len(encrypted))
@@ -143,23 +146,23 @@ def insertNamedValue(globals, name, data):
         raise MagicSackError("length encrypted %d but %d bytes written" % (
                 len(encrypted), length))
     
-    return hash
+    return binHash
 
 def makeNamedValueLeaf(globals, name, data):
     
     hash = insertNamedValue(globals, name, data)
     return NLHLeaf(name, hash)
 
-def addAddFile(globals, pathToFile, listPath=None):
+def addAFile(globals, pathToFile, listPath=None):
     """
-    Add the contents of a single file to the buildList and the content-keyed 
-    store.  The file is located at 'pathToFile'.  Its name in the BuildList
+    Add the contents of a single file to the nlhTree and the content-keyed 
+    store.  The file is located at 'pathToFile'.  Its name in the NLHTree
     will be 'listPath'.  If listPath is not set, it defaults to pathToFile.
 
     Return a possibly empty status string.
     """
-    nlpTree     = globals.nlpTree
     rng         = globals.rng
+    tree        = globals.tree
     uDir        = globals.uDir
     usingSHA1   = globals.usingSHA1
     status      = ''
@@ -202,10 +205,62 @@ def addAddFile(globals, pathToFile, listPath=None):
                     len(encrypted), length)
 
     if not status:
-        # add the file to the NLPTree ---------------------
+        # add the file to the NLHTree ---------------------
         if not listPath:
             listPath = pathToFile
         leaf = NLHLeaf(listPath, hexHash)
-        nlhTree.insert(leaf)
+        tree.insert(leaf)
     
     return status
+
+# BUILD LIST --------------------------------------------------------
+
+def writeBuildList(globals):
+    key       = globals.key
+    magicDir  = globals.magicDir
+    rng       = globals.rng
+    sk        = globals.sk
+    skPriv    = globals.skPriv
+    title     = globals.title
+    tree      = globals.tree
+    buildList = BuildList(title, sk, tree)
+
+    # sign build list, encrypt, write to disk -------------
+    buildList.sign(skPriv)
+    s         = buildList.__str__().encode('utf-8')
+    padded    = addPKCS7Padding(s, AES_BLOCK_SIZE)
+    iv        = bytes(rng.someBytes(AES_BLOCK_SIZE))
+    cipher    = AES.new(key, AES.MODE_CBC, iv)
+    encrypted = cipher.encrypt(padded)
+    pathToBL  = os.path.join(magicDir, 'b')
+    with open(pathToBL, 'wb') as f:
+        f.write(encrypted)
+
+def readBuildList(globals):
+    """
+    """
+    key       = globals.key
+    magicDir  = globals.magicDir
+    rng       = globals.rng
+    uDir      = globals.uDir
+    usingSHA1 = globals.usingSHA1
+
+    pathToBL  = os.path.join(magicDir, 'b')
+        data = f.read()
+    iv = data[:AES_BLOCK_SIZE]
+    ciphertext = data[AES_BLOCK_SIZE]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext = cipher.decrypt(ciphertext)
+    s = stripPKCS7Padding(plaintext)
+    buildList = BuildList.parse(s, usingSHA1)
+    if not buildList.verify():
+        raise MagicSackError("could not verify digital signature on BuildList")
+
+    globals.timestamp   = buildList.timestamp
+    globals.title       = buildList.title
+    globals.tree        = buildList.tree
+
+    # retrieve __ckPriv__ and __skPriv__ hashes from the BuildList, and
+    # use these to extract their binary values from uDir
+    # XXX WORKING HERE XXX
+
