@@ -1,5 +1,13 @@
 ~/dev/py/magicksack/TODO
 
+2015-05-31
+    * readBuildList once NLHTree.find() is working
+
+2015-05-28
+    * verify is getting incorrect PKCS7 padding error, line 68
+        in __init__.py, which calls line 66 in xlattice/crypto.py
+        - testPuzzle.py succeeds
+
 2015-05-28
     * BUG IN ARGPARSE: subcommands cannot include options
         if the primary command (magicSack in this case) has an

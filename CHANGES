@@ -1,5 +1,11 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.2.10
+    2015-05-31
+        * init writes puzzle, BuildList                             SLOC  491
+v0.2.9
+    2015-05-29
+        * add handleAdd                                             SLOC  455
 0.2.8
     2015-05-28
         * add generateKey, devisePuzzle, checkPuzzle, and test      SLOC  384
@@ -36,3 +42,5 @@
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
+
