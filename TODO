@@ -1,5 +1,22 @@
 ~/dev/py/magicksack/TODO
 
+2015-06-12 
+    * restructure magicSack so that top argparse level has only
+        one option (-m/--magicDir) and subcommands have multiple
+        arguments
+        - get init running again
+        - get add working at least to a degree
+
+2015-06-12
+    * crashes if title (-t) is not specified
+
+2015-06-02
+    * G: technical description is incorrect
+    * G: command line description is wrong
+    * G: there should be a link to buildList, which is used here
+    * G: add a project status section; this should make it clear that
+         it's currently in development
+
 2015-05-31
     * readBuildList once NLHTree.find() is working
 

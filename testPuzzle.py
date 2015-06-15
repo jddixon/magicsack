@@ -34,7 +34,9 @@ class TestPuzzle (unittest.TestCase):
         # we want this the return an immutable 64-byte value
         puzzle = devisePuzzle(passPhrase, salt, self.rng, count)
         
-        self.assertTrue(checkPuzzle(puzzle, passPhrase, salt, count))
+        ok, key = checkPuzzle(puzzle, passPhrase, salt, count)
+        self.assertTrue(ok)
+        self.assertEqual(key == None, False)
 
 if __name__ == '__main__':
     unittest.main()
