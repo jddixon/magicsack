@@ -19,8 +19,8 @@ __all__ = [ '__version__', '__version_date__',
             'writeBuildList',
           ]
 
-__version__      = '0.2.10'
-__version_date__ = '2015-05-31'
+__version__      = '0.2.11'
+__version_date__ = '2015-06-12'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -84,7 +84,6 @@ def checkPuzzle(puzzle, passPhrase, salt, count=1000):
     succeeded.
     """
     key     = generateKey(passPhrase, salt, count)
-    globals.key = key
 
     iv      = puzzle[:AES_BLOCK_SIZE]
     cipher  = AES.new(key, AES.MODE_CBC, iv)
@@ -99,7 +98,7 @@ def checkPuzzle(puzzle, passPhrase, salt, count=1000):
     data    = stripPKCS7Padding(decrypted, AES_BLOCK_SIZE)
     soln    = bytes(data[8:8+AES_BLOCK_SIZE])
 
-    return soln == salt
+    return soln == salt, key
 
 
 # ACTIONS -----------------------------------------------------------
@@ -246,6 +245,7 @@ def readBuildList(globals):
     usingSHA1 = globals.usingSHA1
 
     pathToBL  = os.path.join(magicDir, 'b')
+    with open(pathToBL, 'rb') as f:
         data = f.read()
     iv = data[:AES_BLOCK_SIZE]
     ciphertext = data[AES_BLOCK_SIZE]
@@ -262,5 +262,8 @@ def readBuildList(globals):
 
     # retrieve __ckPriv__ and __skPriv__ hashes from the BuildList, and
     # use these to extract their binary values from uDir
-    # XXX WORKING HERE XXX
+    # Retrieve any top-level leaf nodes whose names begin with double
+    # underscores ('__').  Regard these as reserved names.  For any
+    # such keys, add the key/value combination to globals, where the
+    # value is a hexHash.
 
