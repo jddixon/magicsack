@@ -1,8 +1,9 @@
 <h1 class="libTop">magicsack</h1>
 
-**magicSack** is a utility for storing secret things either locally (on the
-user's laptop or workstation) or over a distributed set of cooperating servers
-or on one of the cloud services or on some combination of the three.
+**magicSack** is a utility for storing secret things either *locally* (on the
+user's laptop or workstation) or 
+*over a distributed set of cooperating servers* or on one of the 
+*cloud services* or on some combination of the three.
 
 MagickSack is in development using Python 3 on Linux.  It should 
 work on Windows as well, but no effort will be made to confirm this
@@ -17,7 +18,7 @@ name and then the document is AES-encrypted using that key before storage.
 It should be possible to generate a different key for each document.  The
 index from the user-assigned key to the encrypted document is stored 
 locally.  The encrypted documents may be stored locally or on one or more
-cooperating servers or on a cloud service or any combination of the 
+cooperating servers or on a cloud service or on any combination of the 
 three.  The index is always digitally signed and AES-encrypted before 
 being stored.  
 
@@ -107,7 +108,7 @@ following from the store.  This action is irrevocable.
 
 This command adds a remote host (another machine that can be reached 
 over the Internet) to the list of cooperating servers.  FQDN may be
-either a domain name or an IP address, a **dotted quad** like 1.2.3.4.
+either a domain name or an IP address, a **dotted quad** like `1.2.3.4`.
 Either may optionally be followed by a port number. 
 
 ### listPeer
@@ -122,3 +123,8 @@ Drops peers matching FQDN from the local list of cooperating peers.  This
 should be an eventually destructive act: the remote peers will at some 
 point remove the data stored there, but there is no guarantee when this
 will occur.  (Remember that all data stored remotely is encrypted.)
+
+## Project Status
+
+Pre-alpha.  Some working code, a few tests that succeed.
+

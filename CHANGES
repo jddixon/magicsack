@@ -1,9 +1,12 @@
 ~/dev/py/magicsack/CHANGES
 
-
+v0.2.12
+    2015-09-06
+        * minor edits to documentation                              SLOC  534
 v0.2.11
-    2015-06-12
+    2015-06-14
         * changed checkPuzzle signature                             SLOC  508
+        * working init subcommand                                   SLOC  534
 v0.2.10
     2015-05-31
         * init writes puzzle, BuildList                             SLOC  491
