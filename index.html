@@ -11,9 +11,10 @@
 <div class="content">
 <h1 class="libTop">magicsack</h1>
 
-<p><strong>magicSack</strong> is a utility for storing secret things either locally (on the
-user&rsquo;s laptop or workstation) or over a distributed set of cooperating servers
-or on one of the cloud services or on some combination of the three.</p>
+<p><strong>magicSack</strong> is a utility for storing secret things either <em>locally</em> (on the
+user&rsquo;s laptop or workstation) or
+<em>over a distributed set of cooperating servers</em> or on one of the
+<em>cloud services</em> or on some combination of the three.</p>
 
 <p>MagickSack is in development using Python 3 on Linux.  It should
 work on Windows as well, but no effort will be made to confirm this
@@ -28,7 +29,7 @@ name and then the document is AES-encrypted using that key before storage.
 It should be possible to generate a different key for each document.  The
 index from the user-assigned key to the encrypted document is stored
 locally.  The encrypted documents may be stored locally or on one or more
-cooperating servers or on a cloud service or any combination of the
+cooperating servers or on a cloud service or on any combination of the
 three.  The index is always digitally signed and AES-encrypted before
 being stored.</p>
 
@@ -119,7 +120,7 @@ following from the store.  This action is irrevocable.</p>
 
 <p>This command adds a remote host (another machine that can be reached
 over the Internet) to the list of cooperating servers.  FQDN may be
-either a domain name or an IP address, a <strong>dotted quad</strong> like 1.2.3.4.
+either a domain name or an IP address, a <strong>dotted quad</strong> like <code>1.2.3.4</code>.
 Either may optionally be followed by a port number.</p>
 
 <h3>listPeer</h3>
@@ -134,6 +135,10 @@ all such peers are listed.</p>
 should be an eventually destructive act: the remote peers will at some
 point remove the data stored there, but there is no guarantee when this
 will occur.  (Remember that all data stored remotely is encrypted.)</p>
+
+<h2>Project Status</h2>
+
+<p>Pre-alpha.  Some working code, a few tests that succeed.</p>
 
 <h2>Licensing</h2>
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />The material on this github.io website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
@@ -150,7 +155,7 @@ Follow the SOFTWARE LICENSE link below for more information on project software 
        </a> project
     </div>
     <div class="logo" >
-      <a href="http://www.xlattice.org">
+      <a href="https://jddixon.github.io/xlattice/">
       <img src="img/xlattice-2014.jpg" alt="the XLattice Project" style="float: right;" >
       </a>
     </div>
