@@ -1,4 +1,4 @@
-# magicSack
+# magicsack
 
 **magicSack** is a utility for storing secret things either *locally* (on the
 user's laptop or workstation) or
@@ -129,5 +129,6 @@ will occur.  (Remember that all data stored remotely is encrypted.)
 Pre-alpha.  Some working code, a few tests that succeed.
 
 ## On-line Documentation
+
 More information on the **magicsack** project can be found
 [here](https://jddixon.github.io/magicsack)
