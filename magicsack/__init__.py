@@ -19,8 +19,8 @@ __all__ = [ '__version__', '__version_date__',
             'writeBuildList',
           ]
 
-__version__      = '0.2.15'
-__version_date__ = '2016-01-28'
+__version__      = '0.2.16'
+__version_date__ = '2016-02-24'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -266,6 +266,7 @@ def readBuildList(globals):
     # underscores ('__').  Regard these as reserved names.  For any
     # such keys, add the key/value combination to globals, where the
     # value is a hexHash.
+
 
 
 
