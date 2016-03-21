@@ -2,21 +2,26 @@
 #
 # ~/dev/py/magicsack/magicSack
 
-import binascii, getpass, json, os, shutil, sys
-from pbkdf2         import PBKDF2       # note name of package is u/c
-from Crypto.Cipher  import AES
-from Crypto.Hash      import SHA        # presumably SHA1
+import binascii
+import getpass
+import json
+import os
+import shutil
+import sys
+from pbkdf2 import PBKDF2       # note name of package is u/c
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA        # presumably SHA1
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_PSS
-from argparse       import ArgumentParser
+from argparse import ArgumentParser
 
-from buildList      import BuildList
-from nlhtree        import NLHTree
-from rnglib         import SimpleRNG, SystemRNG
+from buildList import BuildList
+from nlhtree import NLHTree
+from rnglib import SimpleRNG, SystemRNG
 from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
-from xlattice.lfs   import mkdir_p
-from xlattice.ui    import confirmYorN, passwdStrength
-from magicsack      import *
+from xlattice.lfs import mkdir_p
+from xlattice.ui import confirmYorN, passwdStrength
+from magicsack import *
 
 
 def verifyPassPhrase(globals, passPhrase):
@@ -25,7 +30,7 @@ def verifyPassPhrase(globals, passPhrase):
     #print("globals is a ", type(globals))
     # END
     ok = True
-    magicDir    = globals.magicDir
+    magicDir = globals.magicDir
     if not os.path.exists(magicDir):
         print("%s does not exist; cannot continue" % magicDir)
         sys.exit(1)
@@ -48,14 +53,14 @@ def verifyPassPhrase(globals, passPhrase):
     print("CONFIGURATION:")
     print(data)
     # END
-    
+
     globals.hexSalt = cfg['salt']
-    globals.salt    = binascii.a2b_hex(globals.hexSalt)
+    globals.salt = binascii.a2b_hex(globals.hexSalt)
     # DEBUG
     #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(globals.salt).decode('utf-8'))
     # END
-    globals.uDir    = cfg['uDir']
-  
+    globals.uDir = cfg['uDir']
+
     # Read the puzzle file, then check that the salt encrypted there
     # matches the salt in the configuration file.  If it doesn't, the
     # key and therefore the passphrase are wrong.
@@ -68,8 +73,9 @@ def verifyPassPhrase(globals, passPhrase):
     #print("%s" % binascii.b2a_hex(puzzle))
     # END
     ok = checkPuzzle(puzzle, passPhrase, globals.salt)
-   
+
     return ok
+
 
 def handleInit(globals, subArgs, passPhrase):
 
@@ -84,11 +90,11 @@ def handleInit(globals, subArgs, passPhrase):
             sys.exit(1)
 
     # Neither the salt nor any IVs need be kept secret.
-    salt    = bytes(rng.someBytes(16))
-    key     = bytes(PBKDF2(passPhrase, salt).read(32))     # 32-byte key
+    salt = bytes(rng.someBytes(16))
+    key = bytes(PBKDF2(passPhrase, salt).read(32))     # 32-byte key
 
     # loop: verify that second passphrase matches first
-    pp2     = getpass.getpass("Confirm passphrase: ")
+    pp2 = getpass.getpass("Confirm passphrase: ")
     while pp2 != passPhrase:
         # DEBUG
         print("passphrase: %s" % passPhrase)
@@ -104,34 +110,34 @@ def handleInit(globals, subArgs, passPhrase):
     DESC = 'initialize magickSack'
     parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
     parser.add_argument('-1', '--usingSHA1', action='store_true',
-        help='using SHA1 hash algorithm (default is SHA256)')
+                        help='using SHA1 hash algorithm (default is SHA256)')
     parser.add_argument('-f', '--force', action='store_true',
-        help='overwrite any existing configuration')
+                        help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
-        help='show options and exit')
+                        help='show options and exit')
     parser.add_argument('-T', '--testing', action='store_true',
-        help='this is a test run')
+                        help='this is a test run')
     parser.add_argument('-t', '--title', type=str,
-        help='name of the magic sack (required)')
+                        help='name of the magic sack (required)')
     parser.add_argument('-u', '--uDir',
-        help='path to uDir (relative to tmp/ if testing)')
-    parser.add_argument('-v', '--verbose',  action='store_true',
-        help='be chatty')
+                        help='path to uDir (relative to tmp/ if testing)')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='be chatty')
     args = parser.parse_args(subArgs)
 
     # fixups
-    args.key    = key
-    args.rng    = rng
+    args.key = key
+    args.rng = rng
 
-    appName     = globals.appName
-    defaultDir  = globals.defaultDir
-    magicDir    = globals.magicDir
-    
-    force       = args.force
-    title       = args.title
-    uDir        = args.uDir
-    usingSHA1   = args.usingSHA1
-    verbose     = args.verbose
+    appName = globals.appName
+    defaultDir = globals.defaultDir
+    magicDir = globals.magicDir
+
+    force = args.force
+    title = args.title
+    uDir = args.uDir
+    usingSHA1 = args.usingSHA1
+    verbose = args.verbose
 
     if args.testing:
         rng = SimpleRNG()
@@ -211,7 +217,7 @@ def handleInit(globals, subArgs, passPhrase):
     # ACTION --------------------------------------------------------
 
     # write configuration to magicDir ---------------------
-    cfg = {'salt':hexSalt, 'uDir':uDir}
+    cfg = {'salt': hexSalt, 'uDir': uDir}
     jCfg = json.dumps(cfg, indent=2, sort_keys=True)
     # DEBUG
     print("JSON: %s" % jCfg)
@@ -221,7 +227,7 @@ def handleInit(globals, subArgs, passPhrase):
         f.write(jCfg)
 
     # write the puzzle file -------------------------------
-    puzzle       = devisePuzzle(passPhrase, salt, rng)
+    puzzle = devisePuzzle(passPhrase, salt, rng)
     pathToPuzzle = os.path.join(magicDir, 'p')
     with open(pathToPuzzle, 'wb') as f:
         f.write(puzzle)
@@ -231,28 +237,29 @@ def handleInit(globals, subArgs, passPhrase):
     # END
 
     # generate two 2048 bit RSA private keys --------------
-    ckPriv      = RSA.generate(2048)
-    ckPrivPem   = ckPriv.exportKey('PEM')
+    ckPriv = RSA.generate(2048)
+    ckPrivPem = ckPriv.exportKey('PEM')
 
-    skPriv      = RSA.generate(2048)
-    skPrivPem   = ckPriv.exportKey('PEM')
-    sk          = skPriv.publickey()
+    skPriv = RSA.generate(2048)
+    skPrivPem = ckPriv.exportKey('PEM')
+    sk = skPriv.publickey()
 
     # create and populate NLHTree -------------------------
-    tree        = NLHTree(title, usingSHA1)
-    tree.insert(makeNamedValueLeaf(args,'__ckPrivPem__', ckPrivPem))
-    tree.insert(makeNamedValueLeaf(args,'__skPrivPem__', skPrivPem))
-    args.magicDir   = magicDir
-    args.sk         = sk
-    args.skPriv     = skPriv
-    args.title      = title
-    args.tree       = tree
+    tree = NLHTree(title, usingSHA1)
+    tree.insert(makeNamedValueLeaf(args, '__ckPrivPem__', ckPrivPem))
+    tree.insert(makeNamedValueLeaf(args, '__skPrivPem__', skPrivPem))
+    args.magicDir = magicDir
+    args.sk = sk
+    args.skPriv = skPriv
+    args.title = title
+    args.tree = tree
     writeBuildList(args)
 
 
 def handleDestroy(globals):
     print('destroy: not yet implemented')
     sys.exit(0)
+
 
 def handleAddFile(globals, subArgs):
     """
@@ -266,17 +273,17 @@ def handleAddFile(globals, subArgs):
     DESC = 'add something to magickSack'
     parser = ArgumentParser(description=DESC)
     parser.add_argument('-f', '--force', action='store_true',
-        help='overwrite any existing configuration')
+                        help='overwrite any existing configuration')
     parser.add_argument('-j', '--justShow', action='store_true',
-        help='show options and exit')
+                        help='show options and exit')
     parser.add_argument('-T', '--testing', action='store_true',
-        help='this is a test run')
-    parser.add_argument('-v', '--verbose',  action='store_true',
-        help='be chatty')
+                        help='this is a test run')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='be chatty')
     args = parser.parse_args()
 
-    magicDir    = globals.magicDir
-    verbose     = args.verbose 
+    magicDir = globals.magicDir
+    verbose = args.verbose
 
     # echo back command line args -----------------------------------
 
@@ -300,13 +307,16 @@ def handleAddFile(globals, subArgs):
     print('add: not yet completelyimplemented')
     sys.exit(0)
 
+
 def handleListFile(globals, subArgs):
     print('list: not yet implemented')
     sys.exit(0)
 
+
 def handleShowFile(globals, subArgs):
     print('show: not yet implemented')
     sys.exit(0)
+
 
 def handleDropFile(globals, subArgs):
     """
@@ -315,30 +325,34 @@ def handleDropFile(globals, subArgs):
     print('drop: not yet implemented')
     sys.exit(0)
 
+
 def handleAddPeer(globals, subArgs):
     print('addPeer: not yet implemented')
     sys.exit(0)
+
 
 def handleListPeer(globals, subArgs):
     print('listPeer: not yet implemented')
     sys.exit(0)
 
+
 def handleDropPeer(globals, subArgs):
     print('dropPeer: not yet implemented')
     sys.exit(0)
 
+
 def main():
     """
-    The command line looks like 
+    The command line looks like
         magicSack [-m MAGIC_DIR] SUBCMD otherArgs
-    So at the top level we peek at sys.argv[1].  If it's '-m' or 
+    So at the top level we peek at sys.argv[1].  If it's '-m' or
     '--magicDir' we will collect it and its parameter here and
-    process sys.argv[4:] as subArgs.  Otherwise we process sys.argv[2:] 
+    process sys.argv[4:] as subArgs.  Otherwise we process sys.argv[2:]
     as subArgs in the subcommand.
     """
-   
+
     args = sys.argv
-   
+
     defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
     subCmdAt = 1
     if len(args) >= 4:
@@ -352,17 +366,17 @@ def main():
     DESC = 'command-line interface to the Magic Sack'
     parser = ArgumentParser(description=DESC)
     parser.add_argument('-m', '--magicDir', default=defaultDir, type=str,
-        help='select folder/directory (default=%s)' % defaultDir)
+                        help='select folder/directory (default=%s)' % defaultDir)
     parser.add_argument('command',          # required
-        help='subCommand to be executed')
-    args = parser.parse_args(sys.argv[1 : subCmdAt + 1])
+                        help='subCommand to be executed')
+    args = parser.parse_args(sys.argv[1: subCmdAt + 1])
 
     args.appName = 'magicSack %s' % __version__
     args.defaultDir = defaultDir
 
     funcName = 'handle' + (args.command.capitalize())
-    subArgs  = sys.argv[subCmdAt + 1:] 
-    
+    subArgs = sys.argv[subCmdAt + 1:]
+
     # DEBUG
     if funcName in globals():
         print("%s is present" % funcName)
@@ -374,8 +388,8 @@ def main():
     # END
 
     # fixups
-    magicDir    = args.magicDir
-    args.rng    = SystemRNG()
+    magicDir = args.magicDir
+    args.rng = SystemRNG()
 
     # DEBUG
     print("magicDir: %s" % magicDir)
@@ -391,7 +405,7 @@ def main():
         sys.exit(1)
     args.passPhrase = passPhrase
     command = args.command
-    if command   == 'init':
+    if command == 'init':
         handleInit(args, subArgs, passPhrase)
     else:
         if not verifyPassPhrase(args, passPhrase):
@@ -401,4 +415,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
