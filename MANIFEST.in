@@ -1,7 +1,7 @@
 # see http://docs.python.org/distutils/sourcedist.html
 
 include netDistrib.conf
-include countem installit
+include auto8it countem installit
 include .gitignore CHANGES MANIFEST.in README.* TODO
 include magicSack
 recursive-include magicsack *.py

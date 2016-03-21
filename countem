@@ -4,7 +4,7 @@ rm -rf build/* tmp/*
 
 pySloc -v $@                        \
     txt:.gitignore                  \
-    bash:countem  bash:installit    \
+    bash:auto8it bash:countem  bash:installit    \
     txt:MANIFEST.in                 \
     py:magicSack                    \
 
