@@ -1,3 +1,5 @@
+#!/bin/bash
+
 subcmd=$1
 shift
 ./magicSack $subcmd -T $@
