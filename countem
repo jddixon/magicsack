@@ -1,11 +1,8 @@
-cd /home/jdd/dev/py/magicsack
+#!/bin/bash
 
-rm -rf build/* tmp/*
+cd ~/dev/py/magicsack
 
-pySloc -v $@                        \
-    txt:.gitignore                  \
-    bash:auto8it bash:countem  bash:installit    \
-    txt:MANIFEST.in                 \
-    py:magicSack                    \
+rm -rf build/* tmp/* 
 
+pySloc -X '^build$|^tmp$' -v $@
 

@@ -1,0 +1,5 @@
+#:perhaps:less:obvious:mappings:
+bash:local:M
+dir:pkg:magicsack
+dir:tmp:tmp
+py:global:magicSack

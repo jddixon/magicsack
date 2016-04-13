@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.2.18
+    2016-04-12
+        * add .fileMap{,.local}; fix countem                        SLOC  540
 v0.2.17
     2016-03-21
         * add and execute auto8it                                   SLOC  548
@@ -64,6 +67,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 

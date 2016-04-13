@@ -1,0 +1,15 @@
+code:local:.fileMap
+code:local:.fileMap.local
+bash:std:auto8it
+bash:std:countem
+bash:std:installit
+bash:std:test.all
+bash:local:M
+dir:pkg:magicsack
+dir:std:dist
+dir:std:ghpDoc
+dir:tmp:build
+dir:tmp:tmp
+py:std:setup.py
+py:global:magicSack
+py:test:testPuzzle.py
