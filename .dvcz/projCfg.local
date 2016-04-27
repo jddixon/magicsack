@@ -1,0 +1,16 @@
+# perhaps less obvious mappings 
+
+code:std:.dvcz/projCfg
+code:std:.dvcz/projCfg.local
+
+dir:pkg:magicsack
+dir:clr:tmp
+
+bash:std:auto8it
+bash:std:countem
+bash:std:installit
+bash:std:test.all
+
+bash:local:M
+
+py:global:magicSack

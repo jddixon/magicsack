@@ -1,8 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-cd ~/dev/py/magicsack
+cd $DEV_BASE/py/magicsack
 
 rm -rf build/* tmp/* 
 
-pySloc -X '^build$|^tmp$' -v $@
-
+pySloc  -X dist -v $@
