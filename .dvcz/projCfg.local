@@ -2,6 +2,7 @@
 
 code:std:.dvcz/projCfg
 code:std:.dvcz/projCfg.local
+code:std:MANIFEST.in
 
 dir:pkg:magicsack
 dir:clr:tmp
