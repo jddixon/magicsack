@@ -4,7 +4,11 @@ if [ ! -z "${DEV_BASE// }" ]
 then
   cd $DEV_BASE/py/magicsack
   
-  ./setup.py build sdist && sudo ./setup.py install
+  blListGen \
+    -d ../magicsack \
+    -1L  \
+    -u $DVCZ_UDIR \
+    $@
   
 else
   echo "DEV_BASE is not defined"

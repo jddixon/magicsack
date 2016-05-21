@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.2.21
+    2016-05-21
+        * add bkp2U, update .dvcz                                   SLOC  860
 v0.2.20
     2016-05-10
         * correct use of xlattice.u                                 SLOC  566
@@ -73,6 +76,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 

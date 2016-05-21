@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-cd $DEV_BASE/py/magicsack
-
-rm -rf build/* tmp/* 
-
-pySloc  -X dist -v $@
+if [ ! -z "${DEV_BASE// }" ]
+then
+  cd $DEV_BASE/py/magicsack
+  
+  rm -rf build/* tmp/* 
+  
+  pySloc  -X dist -v $@
+else
+  echo "DEV_BASE is not defined"
+fi

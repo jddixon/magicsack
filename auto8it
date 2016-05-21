@@ -1,3 +1,0 @@
-cd /home/jdd/dev/py/magicsack
-
-autopep8 -air magicsack *.py magicSack
