@@ -19,7 +19,6 @@ from buildList import BuildList
 from nlhtree import NLHTree
 from rnglib import SimpleRNG, SystemRNG
 from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
-from xlattice.lfs import mkdir_p
 from xlattice.ui import confirmYorN, passwdStrength
 from magicsack import *
 
@@ -30,11 +29,11 @@ def verifyPassPhrase(globals, passPhrase):
     #print("globals is a ", type(globals))
     # END
     ok = True
-    magicDir = globals.magicDir
-    if not os.path.exists(magicDir):
-        print("%s does not exist; cannot continue" % magicDir)
+    magicPath = globals.magicPath
+    if not os.path.exists(magicPath):
+        print("%s does not exist; cannot continue" % magicPath)
         sys.exit(1)
-    configFile = os.path.join(magicDir, 'cfg.json')
+    configFile = os.path.join(magicPath, 'cfg.json')
     if not os.path.exists(configFile):
         print("%s does not exist; cannot continue" % configFile)
         sys.exit(1)
@@ -59,13 +58,13 @@ def verifyPassPhrase(globals, passPhrase):
     # DEBUG
     #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(globals.salt).decode('utf-8'))
     # END
-    globals.uDir = cfg['uDir']
+    globals.uPath = cfg['uPath']
 
     # Read the puzzle file, then check that the salt encrypted there
     # matches the salt in the configuration file.  If it doesn't, the
     # key and therefore the passphrase are wrong.
 
-    pathToPuzzle = os.path.join(magicDir, 'puzzle')
+    pathToPuzzle = os.path.join(magicPath, 'puzzle')
     with open(pathToPuzzle, 'rb') as f:
         puzzle = f.read()
     # DEBUG
@@ -119,7 +118,7 @@ def handleInit(globals, subArgs, passPhrase):
                         help='this is a test run')
     parser.add_argument('-t', '--title', type=str,
                         help='name of the magic sack (required)')
-    parser.add_argument('-u', '--uDir',
+    parser.add_argument('-u', '--uPath',
                         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
@@ -131,41 +130,41 @@ def handleInit(globals, subArgs, passPhrase):
 
     appName = globals.appName
     defaultDir = globals.defaultDir
-    magicDir = globals.magicDir
+    magicPath = globals.magicPath
 
     force = args.force
     title = args.title
-    uDir = args.uDir
+    uPath = args.uPath
     usingSHA1 = args.usingSHA1
     verbose = args.verbose
 
     if args.testing:
         rng = SimpleRNG()
-        if magicDir == defaultDir:
-            magicDir = os.path.join('tmp', '.magicsack')
+        if magicPath == defaultDir:
+            magicPath = os.path.join('tmp', '.magicsack')
         else:
             # XXX A MISTAKE:
-            magicDir = os.path.join('tmp', '.magicsack')
+            magicPath = os.path.join('tmp', '.magicsack')
     else:
         rng = SystemRNG()
 
     # sanity checks -------------------------------------------------
 
-    # magicDir --------------------------------------------
-    parts = magicDir.split('/')
+    # magicPath --------------------------------------------
+    parts = magicPath.split('/')
     for part in parts:
         if part == '.' or part == '..':
-            print("magicDir path '%s' may not contain '%s'" % (magicDir, part))
+            print("magicPath '%s' may not contain '%s'" % (magicPath, part))
             sys.exit(1)
 
-    if os.path.exists(magicDir):
+    if os.path.exists(magicPath):
         if force:
-            shutil.rmtree(magicDir)
+            shutil.rmtree(magicPath)
         else:
-            print('%s already exists, add -f to continue' % magicDir)
+            print('%s already exists, add -f to continue' % magicPath)
             sys.exit(1)
     else:
-        mkdir_p(magicDir, 0o700)
+        os.makedirs(magicPath, mode=0o700, exist_ok=True)
 
     # title -----------------------------------------------
 
@@ -175,28 +174,22 @@ def handleInit(globals, subArgs, passPhrase):
 
     # uDir ------------------------------------------------
 
-    if not uDir or uDir == '':
-        uDir = os.path.join(magicDir, 'uDir')
-    args.uDir = uDir
+    uDir = None
+    if not uPath or uPath == '':
+        uPath = os.path.join(magicDir, 'U')
+    args.uPath = uPath
 
-    parts = uDir.split('/')
-    for part in parts:
-        if part == '.' or part == '..':
-            print("uDir path '%s' may not contain '%s'" % (uDir, part))
-            sys.exit(1)
-
-    if os.path.exists(uDir):
+    if os.path.exists(uPath):
         if args.force:
-            shutil.rmtree(uDir)
+            shutil.rmtree(uPath)
         else:
-            print('%s already exists, add -f to continue' % uDir)
+            print('%s already exists, add -f to continue' % uPath)
             sys.exit(1)
-    else:
-        mkdir_p(uDir, 0o700)
+    uDir = UDir.discover(uPath, mode=0o700)        # HERE
 
-    # uDir/tmp --------------------------------------------
-    uDirTmp = os.path.join(uDir, 'tmp')
-    mkdir_p(uDirTmp, 0o700)
+    # uPath/tmp --------------------------------------------
+    uPathTmp = os.path.join(uPath, 'tmp')
+    os.makedirs(uPathTmp, mode=0o700)
 
     # convert salt to something json can handle
     hexSalt = binascii.b2a_hex(salt).decode('utf-8')
@@ -211,13 +204,13 @@ def handleInit(globals, subArgs, passPhrase):
         print("magicDir     = %s" % magicDir)
         print("salt         = %s" % hexSalt)
         print("title        = %s" % title)
-        print("uDir         = %s" % uDir)
+        print("uPath        = %s" % uPath)
         print("verbose      = %s" % verbose)
 
     # ACTION --------------------------------------------------------
 
     # write configuration to magicDir ---------------------
-    cfg = {'salt': hexSalt, 'uDir': uDir}
+    cfg = {'salt': hexSalt, 'uPath': uPath}
     jCfg = json.dumps(cfg, indent=2, sort_keys=True)
     # DEBUG
     print("JSON: %s" % jCfg)

@@ -1,0 +1,77 @@
+-----BEGIN RSA PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoM2sBgX0ChP2JriXkOxS
+e2FjHYVzBGkNvgf0vIAa7FFYZi2pWmxBAVXgl3tTiB3quqqud/MbKqdejM6gkKBK
+v8f7hlcBQLD6BLIZ/RRfhIElc+WlDVfKSnBTB4va5qTQAgvuq5i8+oMj7G8WEy5d
+7cYucWyUJMtHvT4pCDtBWeeqQ62tByWjv34Ud/+A9Mjf0leiWxM3tiToVsqIKb4s
+zPjEShF9rvcNa9XEy1dKpcDz9Szbm2SlxOgM83fDDGtOq4SSCSqndtxrOvXXPB57
+H1mJV/FmerbXRPm5ERJVNIxtLk7Gr2Ce45FVlWyJGMhpfVlKkkk+bRQ02OFfazJI
+GQIDAQAB
+-----END RSA PUBLIC KEY-----
+magicsack v0.2.22
+2016-06-23 17:57:22
+# START CONTENT #
+magicsack
+ .copyright 803f3e50518123ef8a08d34f2238e89b62d0c9a2
+ .dvcz
+  fileMap a22693715232155fcac1950c9ec41535bc05612e
+  fileMap.local 4c7d7878a60c62fa4a358ba8409e89c2f3b76818
+  projCfg 52c9dd1be9c338195884c23c04446eb15baef3bb
+  projCfg.local 719eab16996b75b5f93900eecadf8dc888d63623
+  version 19eb93f46b096b317ed432a4a7e12d3e390c2874
+ .gitignore 5f1a04317952b671c5828218c6efe88c2594f8fb
+ CHANGES c3953b545affeecc368f430db4fcaac9dcdeac13
+ LICENSE.md d1cecfadc47b23486f6bc8a863cfdde348c3eb46
+ M 391952e239e611a326a10f64b153779656e3ea3a
+ MANIFEST.in 4b024c0d0e8cb1329ea767cdd0858c4984849b97
+ README.md 448ae5fdd4b9c1cce2b74b35db30b77ac467eeb3
+ TODO df2b3af08e4944083cb56a44a502444b84d0b804
+ bkp2U bd856745d78a7b8828b2b4a27d614e7d2c3b3674
+ countem d69869378553bb0b57a5b81bb78e358608960c67
+ dist
+  magicsack-0.2.0.tar.gz f503d3a8852d2df74483fb7d6a6f2c3bcd30dd4b
+  magicsack-0.2.1.tar.gz 9bb70c9c6aa23d8a2a84d144f0488278cd89d3b3
+  magicsack-0.2.10.tar.gz d96a6f82cf2338018f5da32abc16ea02fdb8638b
+  magicsack-0.2.11.tar.gz 11c28fb8942a9cd1054f39933c2f0a0271f9d4f9
+  magicsack-0.2.12.tar.gz 7c609701576af1d4485228171bd8c55661147c2c
+  magicsack-0.2.13.tar.gz d8dff7a58e2a06ad0738828e28955764824ce0dc
+  magicsack-0.2.15.tar.gz f67f93fc4bcd5be02f4fcbbb8a85b8f934935149
+  magicsack-0.2.16.tar.gz 6d9f9c43b461ae4e1ce173b82714da1294d40c7f
+  magicsack-0.2.17.tar.gz 3cfd305564f36608d130574f1d79d1fe41e38703
+  magicsack-0.2.19.tar.gz 73cbe0105183bc626cc9fa75547d23c33f8ff968
+  magicsack-0.2.2.tar.gz f08efd0b05a6d845821947d98b2d34e5e0989fda
+  magicsack-0.2.20.tar.gz 938a1ba916ff5f0adc743bf771d469f1fc771e3b
+  magicsack-0.2.21.tar.gz b482efa1a57410db0b1878b4880f2770f22497c7
+  magicsack-0.2.22.tar.gz 8ac2c9ecfb1b1ed70f46ae86727051c259d70b7e
+  magicsack-0.2.3.tar.gz d4ff75d0804f7c737a24ff5648b79dcd74c3801a
+  magicsack-0.2.4.tar.gz c99eb5fc6a4a5e73c915f5a69c91e37247055adf
+  magicsack-0.2.5.tar.gz 2856a9b81d5c238ac467167718da0591f9a0b7a3
+  magicsack-0.2.6.tar.gz cb43da692ed2e000d3c06536224b66ca2231879c
+  magicsack-0.2.7.tar.gz 32585c1219627df429cdcf58a1466e25357d3bf0
+  magicsack-0.2.8.tar.gz 87366c90c9102412c2cfb7661ffae8e17bb7f3fc
+  magicsack-0.2.9.tar.gz 10aef1df3dd1e7141e3c8fb5b810950461062281
+ ghpDoc
+  css
+   LICENSE.html5-boilerplate.md ded771b3245b190da0e81c76de5a80d41392c0a6
+   ghp.css 1d6ebe8a6cf8f61f4645a793cb087dfae2420f33
+   main.css 018ed80b8a6e6607bc7c08595fa5a7fa56853885
+   normalize.css cba40c7ce3d558d00ff79d7505ac3d348015ec9c
+  img
+   GitHub-Mark-32px.png fabe53eb72f9b6d3d47cd95aff31ffc45c2fdbf8
+   chunk.jpg de2b27e41f1547fc14b13399f5906b4303b49657
+   chunk2.jpg d0593d312dbb8ea837c17b28cb639726e29ea93b
+   cluster-with-clients.jpg c167d04c0c6b5736ef9fe4cdc3fcce1956fdea78
+   simple-cluster.jpg 6b223ddd25937c1ef75ef328f36fc3436f10bd62
+   xl-registration.jpg 15cbf951f9db173a45428b32dcec87aca83bbdf0
+   xlattice-2014.jpg f185aaad06db71acd9454f31054c62c56d36f37f
+  index.md bcfb748019815d8889755b1f88dcbd016f23462b
+ installit e6894c052702baebbaa1a2a99bb727b997a87521
+ magicSack a0bb39b24dbe4d8233210a246e5863bfaa5b2c4a
+ magicsack
+  __init__.py d0febae657a9c104cf7dce4454544e79a3fed528
+ setup.py ef07b24b289eb471133422db2bd6734303238e74
+ styleit f982f13d294ff9ba779df715ff4804638c0085d1
+ test.all af9dc7a02e246a4765491d4d07a3f27048e2e6d3
+ testPuzzle.py 432298ac3ea90ae31b542fa31d99c65366ec0360
+# END CONTENT #
+
+btNLAUP2+yhvW8UQndN8Z5H4XmZp678ARpSmCgHq1CVWmXFGTrS0OpaDxa/BuHf0KGZMbnoAtGU7wRHC0WbHIthc0fkauZx+sskgeo6t64eUAMHEuE7Z3JmL8nj+5meoY4Inej1G/m+uV+u3RmbmnxwTnLBQl83ZdKo2rHPE9r5nAJBWlztpyIBSaqORuiNCsdespUYNZflXAYdtOzXtErznv5iyfjKUfd9822Xc+BS+15D0TUG/OlzqnMHEQBLvH5tRNy408MT5yk/h+5clorhlGf76E+hgBCNKRMAqf8CytnRJhxmFrIiDgXG4UJsMSP2Zg8J/9JjeKpqCTfqMog==
