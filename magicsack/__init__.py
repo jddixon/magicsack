@@ -21,8 +21,8 @@ __all__ = ['__version__', '__version_date__',
            'writeBuildList',
            ]
 
-__version__ = '0.2.21'
-__version_date__ = '2016-05-21'
+__version__ = '0.2.22'
+__version_date__ = '2016-06-23'
 
 # OTHER EXPORTED CONSTANTS
 

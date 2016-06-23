@@ -1,7 +1,9 @@
 ~/dev/py/magicksack/TODO
 
+2016-06-03
+    * modify to use xlattice.u.UDir                                     * DONE
 2016-05-11
-    * modify to use U_16 or U_FLAT 
+    * modify to use U_16 or U_FLAT                                      * DONE
 
 2015-09-06
     * read codahale.com/how-to-safely-store-a-password again
