@@ -89,15 +89,17 @@ the system.</p>
 <h3>add</h3>
 
 <p>The <code>add</code> command adds the files listed.  These are specified using <strong>globs</strong>,
-meaning patterns.  So if for example <code>FILE</code> is <code>abc*</code>, then all local files
+file name patterns.  So if for example <code>FILE</code> is <code>abc*</code>, then all local files
 whose names begin with <code>abc</code> will be added to magicsack.</p>
 
-<p>This is not a destructive operation.</p>
+<p>This is not a destructive operation.  That is, if a file is added, it will be
+copied into .magicsack, be the original will be unaffected.</p>
 
 <h3>list</h3>
 
-<p><code>list</code> is followed by zero or more globs.  If there are no globs, then
-the entire contents of the magicksack store will be listed.  Otherwise
+<p><code>list</code> is followed by zero or more globs (file name patterns).  If there
+are no globs, then
+the entire contents of the magicsack store will be listed.  Otherwise
 any file matching the pattern will be listed</p>
 
 <p>The listing contains only information about the document(s) requested,
@@ -106,7 +108,8 @@ where the size is the size before encryption.</p>
 
 <h3>show</h3>
 
-<p><code>show</code> must be followed by one or more globs.  The contens of any file
+<p><code>show</code> must be followed by one or more globs (file name patterns).
+The contens of any file
 whose name or path matches the pattern(s) will be displayed.  In other
 words, this information will be sent to <code>stdout</code>, which may of course
 be directed to a file.</p>
