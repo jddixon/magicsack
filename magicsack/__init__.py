@@ -21,8 +21,8 @@ __all__ = ['__version__', '__version_date__',
            'writeBuildList',
            ]
 
-__version__ = '0.2.22'
-__version_date__ = '2016-06-23'
+__version__ = '0.2.23'
+__version_date__ = '2016-08-17'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -109,15 +109,15 @@ def checkPuzzle(puzzle, passPhrase, salt, count=1000):
 
 
 # ACTIONS -----------------------------------------------------------
-def insertNamedValue(globals, name, data):
+def insertNamedValue(globalNS, name, data):
     """
     Pad and encrypt the data, writing the encrypted value into uDir.
     If successful, return an NLHLeaf.
     """
-    key = globals.key
-    rng = globals.rng
-    uDir = globals.uDir
-    usingSHA1 = globals.usingSHA1
+    key = globalNS.key
+    rng = globalNS.rng
+    uPath = globalNS.uPath
+    usingSHA1 = globalNS.usingSHA1
 
     padded = addPKCS7Padding(data, AES_BLOCK_SIZE)
     iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
@@ -136,14 +136,14 @@ def insertNamedValue(globals, name, data):
     # DEBUG
     print("len(encrypted) = %d" % len(encrypted))
     print("len(hexHash)   = %d" % len(hexHash))
-    print("uDir           = %s" % uDir)
+    print("uPath          = %s" % uPath)
     # END
 
     # add the encrypted data to uDir -----------------------
     if usingSHA1:
-        length, hash = u.putData1(encrypted, uDir, hexHash)
+        length, hash = u.putData1(encrypted, uPath, hexHash)
     else:
-        length, hash = u.putData2(encrypted, uDir, hexHash)
+        length, hash = u.putData2(encrypted, uPath, hexHash)
     if hexHash != hash:
         raise MagicSackError(
             "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
@@ -155,13 +155,13 @@ def insertNamedValue(globals, name, data):
     return binHash
 
 
-def makeNamedValueLeaf(globals, name, data):
+def makeNamedValueLeaf(globalNS, name, data):
 
-    hash = insertNamedValue(globals, name, data)
+    hash = insertNamedValue(globalNS, name, data)
     return NLHLeaf(name, hash)
 
 
-def addAFile(globals, pathToFile, listPath=None):
+def addAFile(globalNS, pathToFile, listPath=None):
     """
     Add the contents of a single file to the nlhTree and the content-keyed
     store.  The file is located at 'pathToFile'.  Its name in the NLHTree
@@ -169,10 +169,10 @@ def addAFile(globals, pathToFile, listPath=None):
 
     Return a possibly empty status string.
     """
-    rng = globals.rng
-    tree = globals.tree
-    uDir = globals.uDir
-    usingSHA1 = globals.usingSHA1
+    rng = globalNS.rng
+    tree = globalNS.tree
+    uPath = globalNS.uPath
+    usingSHA1 = globalNS.usingSHA1
     status = ''
 
     if not os.path.exists(pathToFile):
@@ -203,9 +203,9 @@ def addAFile(globals, pathToFile, listPath=None):
         hexHash = sha.hexdigest()
 
         if usingSHA1:
-            length, hash = u.putData1(encrypted, uDir, hexHash)
+            length, hash = u.putData1(encrypted, uPath, hexHash)
         else:
-            length, hash = u.putData2(encrypted, uDir, hexHash)
+            length, hash = u.putData2(encrypted, uPath, hexHash)
         if hash != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
                 hexHash, hash)
@@ -225,14 +225,14 @@ def addAFile(globals, pathToFile, listPath=None):
 # BUILD LIST --------------------------------------------------------
 
 
-def writeBuildList(globals):
-    key = globals.key
-    magicDir = globals.magicDir
-    rng = globals.rng
-    sk = globals.sk
-    skPriv = globals.skPriv
-    title = globals.title
-    tree = globals.tree
+def writeBuildList(globalNS):
+    key = globalNS.key
+    magicPath = globalNS.magicPath
+    rng = globalNS.rng
+    sk = globalNS.sk
+    skPriv = globalNS.skPriv
+    title = globalNS.title
+    tree = globalNS.tree
     buildList = BuildList(title, sk, tree)
 
     # sign build list, encrypt, write to disk -------------
@@ -242,21 +242,21 @@ def writeBuildList(globals):
     iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
     cipher = AES.new(key, AES.MODE_CBC, iv)
     encrypted = cipher.encrypt(padded)
-    pathToBL = os.path.join(magicDir, 'b')
+    pathToBL = os.path.join(magicPath, 'b')
     with open(pathToBL, 'wb') as f:
         f.write(encrypted)
 
 
-def readBuildList(globals):
+def readBuildList(globalNS):
     """
     """
-    key = globals.key
-    magicDir = globals.magicDir
-    rng = globals.rng
-    uDir = globals.uDir
-    usingSHA1 = globals.usingSHA1
+    key = globalNS.key
+    magicPath = globalNS.magicPath
+    rng = globalNS.rng
+    uPath = globalNS.uPath
+    usingSHA1 = globalNS.usingSHA1
 
-    pathToBL = os.path.join(magicDir, 'b')
+    pathToBL = os.path.join(magicPath, 'b')
     with open(pathToBL, 'rb') as f:
         data = f.read()
     iv = data[:AES_BLOCK_SIZE]
@@ -268,13 +268,13 @@ def readBuildList(globals):
     if not buildList.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
 
-    globals.timestamp = buildList.timestamp
-    globals.title = buildList.title
-    globals.tree = buildList.tree
+    globalNS.timestamp = buildList.timestamp
+    globalNS.title = buildList.title
+    globalNS.tree = buildList.tree
 
     # retrieve __ckPriv__ and __skPriv__ hashes from the BuildList, and
     # use these to extract their binary values from uDir
     # Retrieve any top-level leaf nodes whose names begin with double
     # underscores ('__').  Regard these as reserved names.  For any
-    # such keys, add the key/value combination to globals, where the
+    # such keys, add the key/value combination to globalNS, where the
     # value is a hexHash.
