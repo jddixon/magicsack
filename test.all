@@ -1,1 +1,11 @@
-./testPuzzle.py
+#!/usr/bin/env bash
+
+if [ ! -z "${DEV_BASE// }" ]
+then
+  cd $DEV_BASE/py/magicsack
+  
+  ./testPuzzle.py
+  
+else
+  echo "DEV_BASE is not defined"
+fi

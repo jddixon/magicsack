@@ -19,17 +19,18 @@ from buildList import BuildList
 from nlhtree import NLHTree
 from rnglib import SimpleRNG, SystemRNG
 from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
+from xlattice.u import UDir
 from xlattice.ui import confirmYorN, passwdStrength
 from magicsack import *
 
 
-def verifyPassPhrase(globals, passPhrase):
+def verifyPassPhrase(globalNS, passPhrase):
     # DEBUG
     #print("entering verifyPassPhrase")
-    #print("globals is a ", type(globals))
+    #print("globalNS is a ", type(globalNS))
     # END
     ok = True
-    magicPath = globals.magicPath
+    magicPath = globalNS.magicPath
     if not os.path.exists(magicPath):
         print("%s does not exist; cannot continue" % magicPath)
         sys.exit(1)
@@ -53,12 +54,12 @@ def verifyPassPhrase(globals, passPhrase):
     print(data)
     # END
 
-    globals.hexSalt = cfg['salt']
-    globals.salt = binascii.a2b_hex(globals.hexSalt)
+    globalNS.hexSalt = cfg['salt']
+    globalNS.salt = binascii.a2b_hex(globalNS.hexSalt)
     # DEBUG
-    #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(globals.salt).decode('utf-8'))
+    #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(globalNS.salt).decode('utf-8'))
     # END
-    globals.uPath = cfg['uPath']
+    globalNS.uPath = cfg['uPath']
 
     # Read the puzzle file, then check that the salt encrypted there
     # matches the salt in the configuration file.  If it doesn't, the
@@ -71,14 +72,14 @@ def verifyPassPhrase(globals, passPhrase):
     #print("puzzle read from disk (%d bytes):" % len(puzzle))
     #print("%s" % binascii.b2a_hex(puzzle))
     # END
-    ok = checkPuzzle(puzzle, passPhrase, globals.salt)
+    ok = checkPuzzle(puzzle, passPhrase, globalNS.salt)
 
     return ok
 
 
-def handleInit(globals, subArgs, passPhrase):
+def handleInit(globalNS, subArgv, passPhrase):
 
-    rng = globals.rng
+    rng = globalNS.rng
     while True:
         print(("passphrase is %s" % passwdStrength(passPhrase)))
         if confirmYorN('ok to continue? '):
@@ -122,15 +123,15 @@ def handleInit(globals, subArgs, passPhrase):
                         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
-    args = parser.parse_args(subArgs)
+    args = parser.parse_args(subArgv, namespace=globalNS)
 
     # fixups
     args.key = key
     args.rng = rng
 
-    appName = globals.appName
-    defaultDir = globals.defaultDir
-    magicPath = globals.magicPath
+    appName = globalNS.appName
+    defaultDir = globalNS.defaultDir
+    magicPath = globalNS.magicPath
 
     force = args.force
     title = args.title
@@ -174,9 +175,8 @@ def handleInit(globals, subArgs, passPhrase):
 
     # uDir ------------------------------------------------
 
-    uDir = None
     if not uPath or uPath == '':
-        uPath = os.path.join(magicDir, 'U')
+        uPath = os.path.join(magicPath, 'U')
     args.uPath = uPath
 
     if os.path.exists(uPath):
@@ -185,10 +185,12 @@ def handleInit(globals, subArgs, passPhrase):
         else:
             print('%s already exists, add -f to continue' % uPath)
             sys.exit(1)
-    uDir = UDir.discover(uPath, mode=0o700)        # HERE
+    globalNS.uDir = UDir.discover(uPath, mode=0o700)
 
     # uPath/tmp --------------------------------------------
     uPathTmp = os.path.join(uPath, 'tmp')
+    if os.path.exists(uPathTmp):
+        shutil.rmtree(uPathTmp)         # DANGEROUS
     os.makedirs(uPathTmp, mode=0o700)
 
     # convert salt to something json can handle
@@ -201,7 +203,7 @@ def handleInit(globals, subArgs, passPhrase):
     # display command line values -----------------------------------
     if verbose:
         print("force        = %s" % force)
-        print("magicDir     = %s" % magicDir)
+        print("magicPath     = %s" % magicPath)
         print("salt         = %s" % hexSalt)
         print("title        = %s" % title)
         print("uPath        = %s" % uPath)
@@ -209,19 +211,19 @@ def handleInit(globals, subArgs, passPhrase):
 
     # ACTION --------------------------------------------------------
 
-    # write configuration to magicDir ---------------------
+    # write configuration to magicPath ---------------------
     cfg = {'salt': hexSalt, 'uPath': uPath}
     jCfg = json.dumps(cfg, indent=2, sort_keys=True)
     # DEBUG
     print("JSON: %s" % jCfg)
     # END
-    configFile = os.path.join(magicDir, 'cfg.json')
+    configFile = os.path.join(magicPath, 'cfg.json')
     with open(configFile, 'w') as f:
         f.write(jCfg)
 
     # write the puzzle file -------------------------------
     puzzle = devisePuzzle(passPhrase, salt, rng)
-    pathToPuzzle = os.path.join(magicDir, 'p')
+    pathToPuzzle = os.path.join(magicPath, 'p')
     with open(pathToPuzzle, 'wb') as f:
         f.write(puzzle)
 
@@ -241,7 +243,7 @@ def handleInit(globals, subArgs, passPhrase):
     tree = NLHTree(title, usingSHA1)
     tree.insert(makeNamedValueLeaf(args, '__ckPrivPem__', ckPrivPem))
     tree.insert(makeNamedValueLeaf(args, '__skPrivPem__', skPrivPem))
-    args.magicDir = magicDir
+    args.magicPath = magicPath
     args.sk = sk
     args.skPriv = skPriv
     args.title = title
@@ -249,12 +251,12 @@ def handleInit(globals, subArgs, passPhrase):
     writeBuildList(args)
 
 
-def handleDestroy(globals):
+def handleDestroy(globalNS):
     print('destroy: not yet implemented')
     sys.exit(0)
 
 
-def handleAddFile(globals, subArgs):
+def handleAddFile(globalNS, subArgv):
     """
     Prohibit adding files whose names begin with double-underscore ('__').
     """
@@ -273,9 +275,9 @@ def handleAddFile(globals, subArgs):
                         help='this is a test run')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
-    args = parser.parse_args()
+    args = parser.parse_args(namespace=globalNS)
 
-    magicDir = globals.magicDir
+    magicPath = globalNS.magicPath
     verbose = args.verbose
 
     # echo back command line args -----------------------------------
@@ -286,7 +288,7 @@ def handleAddFile(globals, subArgs):
 
     if args.verbose or args.justShow:
         print('justShow     = ' + str(args.justShow))
-        print('magicDir     = ' + str(magicDir))
+        print('magicPath     = ' + str(magicPath))
         print('testing      = ' + str(args.testing))
         print('verbose      = ' + str(verbose))
 
@@ -301,17 +303,17 @@ def handleAddFile(globals, subArgs):
     sys.exit(0)
 
 
-def handleListFile(globals, subArgs):
+def handleListFile(globalNS, subArgv):
     print('list: not yet implemented')
     sys.exit(0)
 
 
-def handleShowFile(globals, subArgs):
+def handleShowFile(globalNS, subArgv):
     print('show: not yet implemented')
     sys.exit(0)
 
 
-def handleDropFile(globals, subArgs):
+def handleDropFile(globalNS, subArgv):
     """
     Prohibit deleting files whose names begin with double-underscore ('__')
     """
@@ -319,17 +321,17 @@ def handleDropFile(globals, subArgs):
     sys.exit(0)
 
 
-def handleAddPeer(globals, subArgs):
+def handleAddPeer(globalNS, subArgv):
     print('addPeer: not yet implemented')
     sys.exit(0)
 
 
-def handleListPeer(globals, subArgs):
+def handleListPeer(globalNS, subArgv):
     print('listPeer: not yet implemented')
     sys.exit(0)
 
 
-def handleDropPeer(globals, subArgs):
+def handleDropPeer(globalNS, subArgv):
     print('dropPeer: not yet implemented')
     sys.exit(0)
 
@@ -339,17 +341,17 @@ def main():
     The command line looks like
         magicSack [-m MAGIC_DIR] SUBCMD otherArgs
     So at the top level we peek at sys.argv[1].  If it's '-m' or
-    '--magicDir' we will collect it and its parameter here and
-    process sys.argv[4:] as subArgs.  Otherwise we process sys.argv[2:]
-    as subArgs in the subcommand.
+    '--magicPath' we will collect it and its parameter here and
+    process sys.argv[4:] as subArgv.  Otherwise we process sys.argv[2:]
+    as subArgv in the subcommand.
     """
 
-    args = sys.argv
+    argv = sys.argv
 
     defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
     subCmdAt = 1
-    if len(args) >= 4:
-        if args[1] == '-m' or args[1] == '--magicDir':
+    if len(argv) >= 4:
+        if argv[1] == '-m' or argv[1] == '--magicPath':
             subCmdAt = 3
 
     # DEBUG
@@ -358,53 +360,54 @@ def main():
 
     DESC = 'command-line interface to the Magic Sack'
     parser = ArgumentParser(description=DESC)
-    parser.add_argument('-m', '--magicDir', default=defaultDir, type=str,
+    parser.add_argument('-m', '--magicPath', default=defaultDir, type=str,
                         help='select folder/directory (default=%s)' % defaultDir)
     parser.add_argument('command',          # required
                         help='subCommand to be executed')
-    args = parser.parse_args(sys.argv[1: subCmdAt + 1])
+    globalNS = parser.parse_args(sys.argv[1: subCmdAt + 1])
 
-    args.appName = 'magicSack %s' % __version__
-    args.defaultDir = defaultDir
+    globalNS.appName = 'magicSack %s' % __version__
+    globalNS.defaultDir = defaultDir
 
-    funcName = 'handle' + (args.command.capitalize())
-    subArgs = sys.argv[subCmdAt + 1:]
+    globalNS.funcName = 'handle' + globalNS.command.capitalize()
+    subArgv = sys.argv[subCmdAt + 1:]
 
     # DEBUG
-    if funcName in globals():
-        print("%s is present" % funcName)
+    # XXX WIERD OLD CODE
+    if globalNS.funcName:
+        print("%s is present" % globalNS.funcName)
     else:
-        print("%s is NOT present" % funcName)
-    print("subArgs:")
-    for ndx, x in enumerate(subArgs):
+        print("%s is NOT present" % globalNS.funcName)
+    print("subArgv:")
+    for ndx, x in enumerate(subArgv):
         print("  %d %s" % (ndx, x))
     # END
 
     # fixups
-    magicDir = args.magicDir
-    args.rng = SystemRNG()
+    magicPath = globalNS.magicPath
+    globalNS.rng = SystemRNG()
 
     # DEBUG
-    print("magicDir: %s" % magicDir)
+    print("magicPath: %s" % magicPath)
     # END
 
-    if not magicDir or magicDir == '':
-        print("magicDir must be specified")
+    if not magicPath:
+        print("magicPath must be specified")
         sys.exit(1)
 
     passPhrase = getpass.getpass('passphrase: ')
     if not passPhrase or passPhrase == '':
         print('you must supply a passphrase')
         sys.exit(1)
-    args.passPhrase = passPhrase
-    command = args.command
+    globalNS.passPhrase = passPhrase
+    command = globalNS.command
     if command == 'init':
-        handleInit(args, subArgs, passPhrase)
+        handleInit(globalNS, subArgv, passPhrase)
     else:
-        if not verifyPassPhrase(args, passPhrase):
+        if not verifyPassPhrase(globalNS, passPhrase):
             print('that was not the right passphrase!')
             sys.exit(1)
-        globals()[funcName](args, subArgs)
+        globalNS.funcName(globalNS, subArgv)
 
 if __name__ == '__main__':
     main()

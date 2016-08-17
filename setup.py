@@ -16,6 +16,13 @@ setup(name='magicsack',
       py_modules=[],
       packages=['magicsack'],
       # following could be in scripts/ subdir
-      scripts=['magicSack', ]
-      # MISSING url
+      scripts=['magicSack', ],
+      # MISSING description
+      classifiers=[
+          'Development Status :: 2 - Pre-Alpha',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
+          'Natural Language :: English',
+          'Programming Language :: Python 3',
+      ],
       )

@@ -77,15 +77,17 @@ the system.
 ### add
 
 The `add` command adds the files listed.  These are specified using **globs**,
-meaning patterns.  So if for example `FILE` is `abc*`, then all local files
+file name patterns.  So if for example `FILE` is `abc*`, then all local files
 whose names begin with `abc` will be added to magicsack.
 
-This is not a destructive operation.
+This is not a destructive operation.  That is, if a file is added, it will be
+copied into .magicsack, be the original will be unaffected.
 
 ### list
 
-`list` is followed by zero or more globs.  If there are no globs, then
-the entire contents of the magicksack store will be listed.  Otherwise
+`list` is followed by zero or more globs (file name patterns).  If there
+are no globs, then
+the entire contents of the magicsack store will be listed.  Otherwise
 any file matching the pattern will be listed
 
 The listing contains only information about the document(s) requested,
@@ -94,7 +96,8 @@ where the size is the size before encryption.
 
 ### show
 
-`show` must be followed by one or more globs.  The contens of any file
+`show` must be followed by one or more globs (file name patterns).
+The contens of any file
 whose name or path matches the pattern(s) will be displayed.  In other
 words, this information will be sent to `stdout`, which may of course
 be directed to a file.
