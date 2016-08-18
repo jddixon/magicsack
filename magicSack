@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#
+
 # ~/dev/py/magicsack/magicSack
 
 import binascii
@@ -8,6 +8,8 @@ import json
 import os
 import shutil
 import sys
+import time
+
 from pbkdf2 import PBKDF2       # note name of package is u/c
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA        # presumably SHA1
@@ -65,7 +67,7 @@ def verifyPassPhrase(globalNS, passPhrase):
     # matches the salt in the configuration file.  If it doesn't, the
     # key and therefore the passphrase are wrong.
 
-    pathToPuzzle = os.path.join(magicPath, 'puzzle')
+    pathToPuzzle = os.path.join(magicPath, 'p')
     with open(pathToPuzzle, 'rb') as f:
         puzzle = f.read()
     # DEBUG
@@ -75,6 +77,8 @@ def verifyPassPhrase(globalNS, passPhrase):
     ok = checkPuzzle(puzzle, passPhrase, globalNS.salt)
 
     return ok
+
+# == init ===========================================================
 
 
 def handleInit(globalNS, subArgv, passPhrase):
@@ -140,7 +144,7 @@ def handleInit(globalNS, subArgv, passPhrase):
     verbose = args.verbose
 
     if args.testing:
-        rng = SimpleRNG()
+        rng = SimpleRNG(time.time())
         if magicPath == defaultDir:
             magicPath = os.path.join('tmp', '.magicsack')
         else:
@@ -171,7 +175,7 @@ def handleInit(globalNS, subArgv, passPhrase):
 
     if not title or title == '':
         print('please supply a title, a name for your magic sack')
-        title = "NO TITLE"       # a hack
+        title = "NO_TITLE"       # a hack
 
     # uDir ------------------------------------------------
 
@@ -240,7 +244,7 @@ def handleInit(globalNS, subArgv, passPhrase):
     sk = skPriv.publickey()
 
     # create and populate NLHTree -------------------------
-    tree = NLHTree(title, usingSHA1)
+    tree = NLHTree(nameFromTitle(title), usingSHA1)
     tree.insert(makeNamedValueLeaf(args, '__ckPrivPem__', ckPrivPem))
     tree.insert(makeNamedValueLeaf(args, '__skPrivPem__', skPrivPem))
     args.magicPath = magicPath
@@ -250,10 +254,107 @@ def handleInit(globalNS, subArgv, passPhrase):
     args.tree = tree
     writeBuildList(args)
 
+# == destroy ========================================================
 
-def handleDestroy(globalNS):
-    print('destroy: not yet implemented')
+
+def handleDestroy(globalNS, subArgv):
+
+    DESC = 'erasing magickSack data from this machine'
+    parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
+
+    parser.add_argument('-j', '--justShow', action='store_true',
+                        help='show options and exit')
+    parser.add_argument('-T', '--testing', action='store_true',
+                        help='this is a test run')
+    parser.add_argument('-q', '--quietly', action='store_true',
+                        help='talk as little as possible')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='be chatty')
+    args = parser.parse_args(subArgv, namespace=globalNS)
+
+    if args.verbose or args.justShow:
+        print("justShow   = %s" % args.justShow)
+        print("magicPath  = %s" % args.magicPath)   # DEBUG
+        print("testing    = %s" % args.testing)
+        print("quietly    = %s" % args.quietly)
+        print("verbose    = %s" % args.verbose)
+    if args.justShow:
+        sys.exit(0)
+
+    # get user confirmation
+    prompt = "thoroughly delete your magicSack files? [yes/No] "
+    while True:
+        whether = input(prompt).capitalize()
+        if not whether or whether[0] == 'N':
+            sys.exit(0)
+        elif whether[0] == 'Y':
+            break
+        else:
+            print("please answer Y or N")
+
+    # recursively scrub files and delete containing diretories
+
+    # for each directoy
+    #     for each file: get filesize, round up to multiple of 4 KB;
+    #         for ecah block
+    #             overwrite block with char, flush;
+    #             overwrite with complement, flush;
+    #             overwrite with random; flush;
+    #         then delete the file
+    #     then delete the directory
+
+    quietly = args.quietly
+
+    BLOCKSIZE = 4096
+    CHAR = 0x74
+    COMP = 0xff & (~CHAR)
+    CHARS = bytes([CHAR for i in range(BLOCKSIZE)])
+    COMPS = bytes([COMP for i in range(BLOCKSIZE)])
+    RND = SimpleRNG(time.time()).someBytes(BLOCKSIZE)
+
+    def scrubFile(pathToFile):
+        info = os.stat(pathToFile)
+        length = info.st_size
+        count = int(0.000001 + (length + BLOCKSIZE - 1) / BLOCKSIZE)
+        with open(pathToFile, 'wb') as f:
+            for n in range(count):
+                f.write(CHARS)
+                f.flush()
+        with open(pathToFile, 'wb') as f:
+            for n in range(count):
+                f.write(COMPS)
+                f.flush()
+        with open(pathToFile, 'wb') as f:
+            for n in range(count):
+                f.write(RND)
+                f.flush()
+        os.remove(pathToFile)
+        if not args.quietly:
+            print("file %s has been scrubbed" % pathToFile)
+
+    def scrubDir(pathToDir):
+        if not quietly:
+            print("scrubbing %s" % globalNS.magicPath)
+        files = os.listdir(pathToDir)
+        for file in files:
+            pathToFile = os.path.join(pathToDir, file)
+            if os.path.isdir(pathToFile):
+                scrubDir(pathToFile)
+            elif os.path.isfile(pathToFile):
+                scrubFile(pathToFile)
+            elif os.path.islink(pathToFile):
+                os.unlink(pathToFile)
+            else:
+                print("don't know how to handle %s" % pathToFile)
+        if not quietly:
+            print("directory %s scrubbed" % pathToDir)
+        shutil.rmtree(pathToDir)
+
+    scrubDir(globalNS.magicPath)
+
     sys.exit(0)
+
+# == addFile ========================================================
 
 
 def handleAddFile(globalNS, subArgv):
@@ -299,19 +400,25 @@ def handleAddFile(globalNS, subArgv):
 
     # XXX WORKING HERE
 
-    print('add: not yet completelyimplemented')
+    print('add: not yet completely implemented')
     sys.exit(0)
 
+
+# == listFile =======================================================
 
 def handleListFile(globalNS, subArgv):
     print('list: not yet implemented')
     sys.exit(0)
 
 
+# == showFile ======================================================
+
 def handleShowFile(globalNS, subArgv):
     print('show: not yet implemented')
     sys.exit(0)
 
+
+# == dropFile =======================================================
 
 def handleDropFile(globalNS, subArgv):
     """
@@ -320,21 +427,29 @@ def handleDropFile(globalNS, subArgv):
     print('drop: not yet implemented')
     sys.exit(0)
 
+# == addPeer ========================================================
+
 
 def handleAddPeer(globalNS, subArgv):
     print('addPeer: not yet implemented')
     sys.exit(0)
 
 
+# == listPeer =======================================================
+
 def handleListPeer(globalNS, subArgv):
     print('listPeer: not yet implemented')
     sys.exit(0)
 
 
+# == dropPeer =======================================================
+
 def handleDropPeer(globalNS, subArgv):
     print('dropPeer: not yet implemented')
     sys.exit(0)
 
+
+# == main ===========================================================
 
 def main():
     """
@@ -346,6 +461,17 @@ def main():
     as subArgv in the subcommand.
     """
 
+    funcMap = {
+        'init': handleInit,
+        'destroy': handleDestroy,
+        'addFile': handleAddFile,
+        'listFile': handleListFile,
+        'showFile': handleShowFile,
+        'dropFile': handleDropFile,
+        'addPeer': handleAddPeer,
+        'listPeer': handleListPeer,
+        'dropPeer': handleDropPeer,
+    }
     argv = sys.argv
 
     defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
@@ -369,15 +495,9 @@ def main():
     globalNS.appName = 'magicSack %s' % __version__
     globalNS.defaultDir = defaultDir
 
-    globalNS.funcName = 'handle' + globalNS.command.capitalize()
     subArgv = sys.argv[subCmdAt + 1:]
 
     # DEBUG
-    # XXX WIERD OLD CODE
-    if globalNS.funcName:
-        print("%s is present" % globalNS.funcName)
-    else:
-        print("%s is NOT present" % globalNS.funcName)
     print("subArgv:")
     for ndx, x in enumerate(subArgv):
         print("  %d %s" % (ndx, x))
@@ -407,7 +527,7 @@ def main():
         if not verifyPassPhrase(globalNS, passPhrase):
             print('that was not the right passphrase!')
             sys.exit(1)
-        globalNS.funcName(globalNS, subArgv)
+        funcMap[command](globalNS, subArgv)
 
 if __name__ == '__main__':
     main()

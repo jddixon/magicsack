@@ -6,16 +6,16 @@
     * modify to use U_16 or U_FLAT                                      * DONE
 
 2015-09-06
-    * read codahale.com/how-to-safely-store-a-password again
+    * read codahale.com/how-to-safely-store-a-password again        
         - written 2010-01-31, updated 2011-02-24
     * then read www.unlimitednovelty.com/2012/03/dont-use-bcrypt.html
-        agaidn
+        again
 
 2015-06-12 
     * restructure magicSack so that top argparse level has only
         one option (-m/--magicDir) and subcommands have multiple
         arguments
-        - get init running again
+        - get init running again                                        * DONE
         - get add working at least to a degree
 
 2015-06-12

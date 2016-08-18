@@ -5,13 +5,13 @@ user's laptop or workstation) or
 *over a distributed set of cooperating servers* or on one of the
 *cloud services* or on some combination of the three.
 
-MagickSack is in development using Python 3 on Linux.  It should
+MagicSack is in development using Python 3 on Linux.  It should
 work on Windows as well, but no effort will be made to confirm this
 until the development version is stable on Linux.
 
 ## Technical Details
 
-MagickSack is protected by a user-selected passphrase.  This is hashed
+MagicSack is protected by a user-selected passphrase.  This is hashed
 using SHA256 and then the 256 bits of the hash are used as an AES
 key.  When documents are added to the system, the user supplies a unique
 name and then the document is AES-encrypted using that key before storage.
@@ -31,15 +31,15 @@ setting up communications with **peers**, hosts cooperating with
 
 ## Command Line
 
-	magicSack init [-f] [-u U_Dir]
-	magicSack destroy
-	magicSack add      FILE [FILE]*
-	magicSack list     [FILE [FILE]*]
-	magicSack show     FILE [FILE]*
-	magicSack drop     FILE [FILE]*
-	magicSack addPeer  FQDN[:PORT] [FQDN[:PORT]]*
-	magicSack listPeer FQDN
-	magicSack dropPeer FQDN[:PORT] [FQDN[:PORT]]*
+	magicSack [-m DIR_NAME] init [-f] [-u U_Dir]
+	magicSack [-m DIR_NAME] destroy
+	magicSack [-m DIR_NAME] add      FILE [FILE]*
+	magicSack [-m DIR_NAME] list     [FILE [FILE]*]
+	magicSack [-m DIR_NAME] show     FILE [FILE]*
+	magicSack [-m DIR_NAME] drop     FILE [FILE]*
+	magicSack [-m DIR_NAME] addPeer  FQDN[:PORT] [FQDN[:PORT]]*
+	magicSack [-m DIR_NAME] listPeer FQDN
+	magicSack [-m DIR_NAME] dropPeer FQDN[:PORT] [FQDN[:PORT]]*
 
 Each of these commands asks for the passphrase.  Except in the case
 of `init`, if the passphrase is wrong, the command will have no effect.

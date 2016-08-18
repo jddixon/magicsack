@@ -16,13 +16,15 @@ from xlattice.crypto import (
     AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding)
 
 __all__ = ['__version__', '__version_date__',
-           'generateKey', 'devisePuzzle', 'checkPuzzle',
-           'makeNamedValueLeaf',
+           'checkPuzzle',
+           'devisePuzzle',
+           'generateKey',
+           'makeNamedValueLeaf', 'nameFromTitle',
            'writeBuildList',
            ]
 
-__version__ = '0.2.23'
-__version_date__ = '2016-08-17'
+__version__ = '0.2.24'
+__version_date__ = '2016-08-18'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -42,6 +44,25 @@ class Config(object):
 
 class MagicSackError(RuntimeError):
     pass
+
+
+def nameFromTitle(title):
+    """ convert a title into an acceptable directory name """
+    s = title.strip()           # strip off lealding & trailing blanks
+    chars = list(s)             # atomize the title
+    for ndx, char in enumerate(chars):
+        if char == ' ':
+            chars[ndx] = '_'
+        elif char == '(':
+            chars[ndx] = '%28'
+        elif char == ')':
+            chars[ndx] = '%29'
+        elif char == '/':
+            chars[ndx] = '%2F'
+        elif char == '\\':
+            chars[ndx] = '%5C'
+
+    return ''.join(chars)
 
 
 def generateKey(passPhrase, salt, count=1000):
@@ -237,8 +258,11 @@ def writeBuildList(globalNS):
 
     # sign build list, encrypt, write to disk -------------
     buildList.sign(skPriv)
-    s = buildList.__str__().encode('utf-8')
-    padded = addPKCS7Padding(s, AES_BLOCK_SIZE)
+    s = buildList.__str__()
+    # DEBUG
+    print("BUILD LIST:\n%s" % s)
+    # END
+    padded = addPKCS7Padding(s.encode('utf-8'), AES_BLOCK_SIZE)
     iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
     cipher = AES.new(key, AES.MODE_CBC, iv)
     encrypted = cipher.encrypt(padded)
@@ -263,7 +287,7 @@ def readBuildList(globalNS):
     ciphertext = data[AES_BLOCK_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = cipher.decrypt(ciphertext)
-    s = stripPKCS7Padding(plaintext)
+    s = stripPKCS7Padding(plaintext).decode('utf-8')
     buildList = BuildList.parse(s, usingSHA1)
     if not buildList.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
@@ -278,3 +302,5 @@ def readBuildList(globalNS):
     # underscores ('__').  Regard these as reserved names.  For any
     # such keys, add the key/value combination to globalNS, where the
     # value is a hexHash.
+
+    # XXX STUB XXX
