@@ -7,28 +7,29 @@ zPjEShF9rvcNa9XEy1dKpcDz9Szbm2SlxOgM83fDDGtOq4SSCSqndtxrOvXXPB57
 H1mJV/FmerbXRPm5ERJVNIxtLk7Gr2Ce45FVlWyJGMhpfVlKkkk+bRQ02OFfazJI
 GQIDAQAB
 -----END RSA PUBLIC KEY-----
-magicsack v0.2.24
-2016-08-18 22:57:05
+magicsack v0.2.25
+2016-08-25 19:45:54
 # BEGIN CONTENT #
 magicsack
- .copyright 803f3e50518123ef8a08d34f2238e89b62d0c9a2
  .dvcz
-  builds e5fab967de2f9ea3f159532d72b2ea74c472edfc
+  builds 4b01b976b150a13a605ccad75a2466838bb0522d
+  copyright 803f3e50518123ef8a08d34f2238e89b62d0c9a2
   fileMap a22693715232155fcac1950c9ec41535bc05612e
   fileMap.local 4c7d7878a60c62fa4a358ba8409e89c2f3b76818
-  lastBuildList 2b4ce80de1b2a5849a8be4c48fa8b70a8a04981a
-  projCfg 5172cd77d8a9369310aa62f6c0ef950b1d4d5b54
-  projCfg.local 719eab16996b75b5f93900eecadf8dc888d63623
-  version 099f9e6bc2309045c61f5f22d2473c3c6f9cb69a
+  lastBuildList d77b3539c11fffb5bb9f92242fe3804b16754401
+  license 5977a55c75bb4612004451a56b0b4c22d9d3311d
+  projCfg 466f4b4e0aada5df556cecb1f8827beb525865f2
+  projCfg.local d289138451c5f67d916cf200cdce48ab8d7b1260
+  version 5c172bc95cd17d54a4858ff40c0be53cbd4237d5
  .gitignore 5f1a04317952b671c5828218c6efe88c2594f8fb
- CHANGES ad0c81bf494aba1400e08e9ebfd8781f04690e49
- LICENSE.md d1cecfadc47b23486f6bc8a863cfdde348c3eb46
+ CHANGES 7353d7f62d68016653811a0255a2638ba3a2d5bc
+ LICENSE-MIT.md d1cecfadc47b23486f6bc8a863cfdde348c3eb46
  M 391952e239e611a326a10f64b153779656e3ea3a
  MANIFEST.in 4b024c0d0e8cb1329ea767cdd0858c4984849b97
  README.md bb846f96b85645e4ce475ed501005de8e88470e5
  TODO de67f976d1dc3e0ba8d9c6b116457b799747c950
  bkp2U 046747f38022b0fa5fecdc487352d3d6b2128af2
- countem 316c6ca801f7b0a2396a03467c734b532d71311d
+ countem b8d5e64d94cc496510f9335bac11e95c8eb32dfa
  dist
   magicsack-0.2.0.tar.gz f503d3a8852d2df74483fb7d6a6f2c3bcd30dd4b
   magicsack-0.2.1.tar.gz 9bb70c9c6aa23d8a2a84d144f0488278cd89d3b3
@@ -46,6 +47,7 @@ magicsack
   magicsack-0.2.22.tar.gz 8ac2c9ecfb1b1ed70f46ae86727051c259d70b7e
   magicsack-0.2.23.tar.gz 9d2debf881fa6d88be2e53d6a8ca091d9dc724bb
   magicsack-0.2.24.tar.gz 4c82ad171f6c27c5518307e45d8dd0d59f44af05
+  magicsack-0.2.25.tar.gz 996e9f5f135d4e3539d35510b54fc0444fa4cb88
   magicsack-0.2.3.tar.gz d4ff75d0804f7c737a24ff5648b79dcd74c3801a
   magicsack-0.2.4.tar.gz c99eb5fc6a4a5e73c915f5a69c91e37247055adf
   magicsack-0.2.5.tar.gz 2856a9b81d5c238ac467167718da0591f9a0b7a3
@@ -71,11 +73,11 @@ magicsack
  installit e6894c052702baebbaa1a2a99bb727b997a87521
  magicSack 69cb73388ce3f2308ade9a3a362aefeb1e7a8127
  magicsack
-  __init__.py 0756712812bf6c61de091879a06daeee5e8eeafb
- setup.py 7c0706dbcaa33e5266617f68209c0cd54a01ef56
+  __init__.py f4ed1f6689a0d31434d341653642da95fd8f8df1
+ setup.py 0df618d06af7956b4aa664d70282c1a9d06a7625
  styleit f982f13d294ff9ba779df715ff4804638c0085d1
  test.all daec9725cbb5e415f1f855ced1e65b46d92f2600
  testPuzzle.py 432298ac3ea90ae31b542fa31d99c65366ec0360
 # END CONTENT #
 
-gXOfZAKb+iiNKwKBXVUhIhBh5DrYdWClvIWWBa3x38OxdI7vYCaI+UnfkhkfuCM6iYSRuTHVo2i5G1R5pkuj7ClLy0MSiTpn5YOq06OXT6fCr5UzwdmQfhSfBorsCdr9ICE0dxziSVV2YCoNAsQDVFReLih8/OXgbX468LMQ2Rijdw1WubUMt6wQ1V4HlNAROYhEoJRKwTQq8Q2ZFH26MnL/8q4mgbeDV62sQojc69FPoZog1mAmJatnvuIODHC3efMnf2eQq8X9dNEg/v88Of42oUaJEFS+f0deOTUsYhhxMJrMkySV9KfOSKeTcDcYHZN+sf4vJdK3PvAu7mniSg==
+dtVN1PtfaCwNv1cieIfU/W5qgfq5F0StLa9+/v0ktQdMP0NunxlWAKTKWlpcFYi+aSTI9UhYUpNroG5orcRlYgojx4hIZamp8yEgOu79O8UZgFG0QIvSeuGvPn/RDRl0Hfhks5JDEEWZFCC0PCMZx4AXvWb6RuYbF9lg4IMEE9FLAkSbwBAcMYgqRkRaiF0WQF8rA4x+u4O470Al2DvEVJiOKSznt7Q4xp2Mgtep2zC96H1oWj6Ybm5Myol4SBqdFqQXpg18/CC3txabFP3ozsTXvgU7hqQ50QpARlX0SFxJHv1+j5lP2dOd1woscmQtPXzg3ivW4wsePuZuJbWSyg==
