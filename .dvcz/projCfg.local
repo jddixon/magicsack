@@ -1,5 +1,7 @@
 # magicsack/.dvcz/projCfg.local
 
+txt:std:LICENSE-MIT.md
+
 dir:pkg:magicsack
 dir:clr:tmp
 

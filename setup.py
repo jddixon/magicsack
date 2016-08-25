@@ -17,7 +17,8 @@ setup(name='magicsack',
       packages=['magicsack'],
       # following could be in scripts/ subdir
       scripts=['magicSack', ],
-      # MISSING description
+      description='a place for secret things',
+      url='https://jddixon.github.io/magicsack',
       classifiers=[
           'Development Status :: 2 - Pre-Alpha',
           'Intended Audience :: Developers',
