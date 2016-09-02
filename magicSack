@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 from buildList import BuildList
 from nlhtree import NLHTree
 from rnglib import SimpleRNG, SystemRNG
+from xlattice import Q
 from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
 from xlattice.u import UDir
 from xlattice.ui import confirmYorN, passwdStrength
@@ -113,7 +114,7 @@ def handleInit(globalNS, subArgv, passPhrase):
 
     DESC = 'initialize magickSack'
     parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
-    parser.add_argument('-1', '--usingSHA1', action='store_true',
+    parser.add_argument('-H', '--usingSHA', choices=[1, 2, 3], default=2,
                         help='using SHA1 hash algorithm (default is SHA256)')
     parser.add_argument('-f', '--force', action='store_true',
                         help='overwrite any existing configuration')
@@ -140,7 +141,7 @@ def handleInit(globalNS, subArgv, passPhrase):
     force = args.force
     title = args.title
     uPath = args.uPath
-    usingSHA1 = args.usingSHA1
+    usingSHA = Q(args.usingSHA)
     verbose = args.verbose
 
     if args.testing:
@@ -244,7 +245,7 @@ def handleInit(globalNS, subArgv, passPhrase):
     sk = skPriv.publickey()
 
     # create and populate NLHTree -------------------------
-    tree = NLHTree(nameFromTitle(title), usingSHA1)
+    tree = NLHTree(nameFromTitle(title), usingSHA)
     tree.insert(makeNamedValueLeaf(args, '__ckPrivPem__', ckPrivPem))
     tree.insert(makeNamedValueLeaf(args, '__skPrivPem__', skPrivPem))
     args.magicPath = magicPath

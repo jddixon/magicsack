@@ -11,7 +11,7 @@ from Crypto.PublicKey import RSA
 
 from buildList import BuildList
 from nlhtree import NLHLeaf
-from xlattice import u256 as u, SHA1_BIN_NONE, SHA2_BIN_NONE
+from xlattice import u256 as Q, u, SHA1_BIN_NONE, SHA2_BIN_NONE
 from xlattice.crypto import (
     AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding)
 
@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'writeBuildList',
            ]
 
-__version__ = '0.2.25'
-__version_date__ = '2016-08-25'
+__version__ = '0.3.0'
+__version_date__ = '2016-09-02'
 
 # OTHER EXPORTED CONSTANTS
 
@@ -138,7 +138,7 @@ def insertNamedValue(globalNS, name, data):
     key = globalNS.key
     rng = globalNS.rng
     uPath = globalNS.uPath
-    usingSHA1 = globalNS.usingSHA1
+    usingSHA = globalNS.usingSHA1
 
     padded = addPKCS7Padding(data, AES_BLOCK_SIZE)
     iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
@@ -146,9 +146,10 @@ def insertNamedValue(globalNS, name, data):
     encrypted = cipher.encrypt(padded)
 
     # hash and encrypt the data ---------------------------
-    if usingSHA1:
+    if usingSHA == Q.USING_SHA1:
         sha = hashlib.sha1()
     else:
+        # FIX ME FIX ME
         sha = hashlib.sha256()
     sha.update(encrypted)
     binHash = sha.digest()
@@ -161,9 +162,10 @@ def insertNamedValue(globalNS, name, data):
     # END
 
     # add the encrypted data to uDir -----------------------
-    if usingSHA1:
+    if usingSHA == Q.USING_SHA1:
         length, hash = u.putData1(encrypted, uPath, hexHash)
     else:
+        # FIX ME FIX ME
         length, hash = u.putData2(encrypted, uPath, hexHash)
     if hexHash != hash:
         raise MagicSackError(
@@ -193,7 +195,7 @@ def addAFile(globalNS, pathToFile, listPath=None):
     rng = globalNS.rng
     tree = globalNS.tree
     uPath = globalNS.uPath
-    usingSHA1 = globalNS.usingSHA1
+    usingSHA = globalNS.usingSHA1
     status = ''
 
     if not os.path.exists(pathToFile):
@@ -216,16 +218,18 @@ def addAFile(globalNS, pathToFile, listPath=None):
         encrypted = cipher.encrypt(padded)
 
         # hash the file and add it to uDir ----------------
-        if usingSHA1:
+        if usingSHA == Q.USING_SHA1:
             sha = hashlib.sha1()
         else:
+            # FIX ME FIX ME
             sha = hashlib.sha256()
         sha.update(encrypted)
         hexHash = sha.hexdigest()
 
-        if usingSHA1:
+        if usingSHA == Q.USING_SHA1:
             length, hash = u.putData1(encrypted, uPath, hexHash)
         else:
+            # FIX ME FIX ME
             length, hash = u.putData2(encrypted, uPath, hexHash)
         if hash != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
@@ -278,7 +282,7 @@ def readBuildList(globalNS):
     magicPath = globalNS.magicPath
     rng = globalNS.rng
     uPath = globalNS.uPath
-    usingSHA1 = globalNS.usingSHA1
+    usingSHA = globalNS.usingSHA1
 
     pathToBL = os.path.join(magicPath, 'b')
     with open(pathToBL, 'rb') as f:
@@ -288,7 +292,7 @@ def readBuildList(globalNS):
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = cipher.decrypt(ciphertext)
     s = stripPKCS7Padding(plaintext).decode('utf-8')
-    buildList = BuildList.parse(s, usingSHA1)
+    buildList = BuildList.parse(s, usingSHA)
     if not buildList.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
 
