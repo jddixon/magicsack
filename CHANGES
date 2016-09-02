@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.3.0
+    2016-09-02
+        * usingSHA1 -> usingSHA : PARTIAL                           SLOC 1288
 v0.2.25
     2016-08-25
         * fix setup.py, license                                     SLOC 1278
@@ -88,6 +91,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 
