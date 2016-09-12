@@ -11,7 +11,7 @@ from Crypto.PublicKey import RSA
 
 from buildList import BuildList
 from nlhtree import NLHLeaf
-from xlattice import u256 as Q, u, SHA1_BIN_NONE, SHA2_BIN_NONE
+from xlattice import u256 as u
 from xlattice.crypto import (
     AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding)
 
@@ -23,10 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'writeBuildList',
            ]
 
-__version__ = '0.3.0'
-__version_date__ = '2016-09-02'
-
-# OTHER EXPORTED CONSTANTS
+__version__ = '0.3.1'
+__version_date__ = '2016-09-12'
 
 
 class Config(object):
@@ -146,11 +144,7 @@ def insertNamedValue(globalNS, name, data):
     encrypted = cipher.encrypt(padded)
 
     # hash and encrypt the data ---------------------------
-    if usingSHA == Q.USING_SHA1:
-        sha = hashlib.sha1()
-    else:
-        # FIX ME FIX ME
-        sha = hashlib.sha256()
+    sha = hashlib.sha256()
     sha.update(encrypted)
     binHash = sha.digest()
     hexHash = binascii.b2a_hex(binHash).decode('utf-8')
@@ -162,11 +156,7 @@ def insertNamedValue(globalNS, name, data):
     # END
 
     # add the encrypted data to uDir -----------------------
-    if usingSHA == Q.USING_SHA1:
-        length, hash = u.putData1(encrypted, uPath, hexHash)
-    else:
-        # FIX ME FIX ME
-        length, hash = u.putData2(encrypted, uPath, hexHash)
+    length, hash = u.putData2(encrypted, uPath, hexHash)
     if hexHash != hash:
         raise MagicSackError(
             "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
@@ -218,19 +208,11 @@ def addAFile(globalNS, pathToFile, listPath=None):
         encrypted = cipher.encrypt(padded)
 
         # hash the file and add it to uDir ----------------
-        if usingSHA == Q.USING_SHA1:
-            sha = hashlib.sha1()
-        else:
-            # FIX ME FIX ME
-            sha = hashlib.sha256()
+        sha = hashlib.sha256()
         sha.update(encrypted)
         hexHash = sha.hexdigest()
 
-        if usingSHA == Q.USING_SHA1:
-            length, hash = u.putData1(encrypted, uPath, hexHash)
-        else:
-            # FIX ME FIX ME
-            length, hash = u.putData2(encrypted, uPath, hexHash)
+        length, hash = u.putData2(encrypted, uPath, hexHash)
         if hash != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
                 hexHash, hash)
