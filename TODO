@@ -1,5 +1,9 @@
 ~/dev/py/magicksack/TODO
 
+2016-10-05
+    * dropy pyCrypto
+    * u_dir is sometimes a path, sometimes an object
+
 2016-06-03
     * modify to use xlattice.u.UDir                                     * DONE
 2016-05-11

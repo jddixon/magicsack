@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-
 # ~/dev/py/magicsack/magicSack
+
+""" Tool for Managing secret stuff. """
 
 import binascii
 import getpass
@@ -9,13 +10,13 @@ import os
 import shutil
 import sys
 import time
+from argparse import ArgumentParser
 
 from pbkdf2 import PBKDF2       # note name of package is u/c
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA        # presumably SHA1
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_PSS
-from argparse import ArgumentParser
 
 from buildList import BuildList
 from nlhtree import NLHTree
@@ -24,85 +25,89 @@ from xlattice import Q
 from xlattice.crypto import AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding
 from xlattice.u import UDir
 from xlattice.ui import confirmYorN, passwdStrength
-from magicsack import *
+from magicsack import(check_puzzle, devise_puzzle, make_named_value_leaf,
+                      write_build_list)
 
 
-def verifyPassPhrase(globalNS, passPhrase):
+def verify_pass_phrase(global_ns, pass_phrase):
+    """ Verify that the user has supplied the correct password. """
+
     # DEBUG
-    #print("entering verifyPassPhrase")
-    #print("globalNS is a ", type(globalNS))
+    #print("entering verify_pass_phrase")
+    #print("global_ns is a ", type(global_ns))
     # END
-    ok = True
-    magicPath = globalNS.magicPath
-    if not os.path.exists(magicPath):
-        print("%s does not exist; cannot continue" % magicPath)
+    ok_ = True
+    magic_path = global_ns.magic_path
+    if not os.path.exists(magic_path):
+        print("%s does not exist; cannot continue" % magic_path)
         sys.exit(1)
-    configFile = os.path.join(magicPath, 'cfg.json')
-    if not os.path.exists(configFile):
-        print("%s does not exist; cannot continue" % configFile)
+    config_file = os.path.join(magic_path, 'cfg.json')
+    if not os.path.exists(config_file):
+        print("%s does not exist; cannot continue" % config_file)
         sys.exit(1)
     try:
-        with open(configFile, 'r') as f:
-            data = f.read()
-    except Exception as e:
-        print("error reading configuration file: %s" % e)
+        with open(config_file, 'r') as file:
+            data = file.read()
+    except Exception as exc:
+        print("error reading configuration file: %s" % exc)
         sys.exit(1)
     try:
         cfg = json.loads(data)
-    except Exception as e:
-        print("error parsing json configuration file: %s" % e)
+    except Exception as exc:
+        print("error parsing json configuration file: %s" % exc)
         sys.exit(1)
     # DEBUG
     print("CONFIGURATION:")
     print(data)
     # END
 
-    globalNS.hexSalt = cfg['salt']
-    globalNS.salt = binascii.a2b_hex(globalNS.hexSalt)
+    global_ns.hex_salt = cfg['salt']
+    global_ns.salt = binascii.a2b_hex(global_ns.hex_salt)
     # DEBUG
-    #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(globalNS.salt).decode('utf-8'))
+    #print("salt as seen by verify:\n    %s" % binascii.b2a_hex(global_ns.salt).decode('utf-8'))
     # END
-    globalNS.uPath = cfg['uPath']
+    global_ns.u_path = cfg['u_path']
 
     # Read the puzzle file, then check that the salt encrypted there
     # matches the salt in the configuration file.  If it doesn't, the
     # key and therefore the passphrase are wrong.
 
-    pathToPuzzle = os.path.join(magicPath, 'p')
-    with open(pathToPuzzle, 'rb') as f:
-        puzzle = f.read()
+    path_to_puzzle = os.path.join(magic_path, 'p')
+    with open(path_to_puzzle, 'rb') as file:
+        puzzle = file.read()
     # DEBUG
     #print("puzzle read from disk (%d bytes):" % len(puzzle))
     #print("%s" % binascii.b2a_hex(puzzle))
     # END
-    ok = checkPuzzle(puzzle, passPhrase, globalNS.salt)
+    ok_ = check_puzzle(puzzle, pass_phrase, global_ns.salt)
 
-    return ok
+    return ok_
 
 # == init ===========================================================
 
 
-def handleInit(globalNS, subArgv, passPhrase):
+def handle_init(global_ns, sub_argv, pass_phrase):
+    """ Execute the init subcommand. """
 
-    rng = globalNS.rng
+    rng = global_ns.rng
     while True:
-        print(("passphrase is %s" % passwdStrength(passPhrase)))
+        print(("passphrase is %s" % passwdStrength(pass_phrase)))
         if confirmYorN('ok to continue? '):
             break
-        passPhrase = getpass.getpass('new passphrase: ')
-        if not passPhrase or passPhrase == '':
+        pass_phrase = getpass.getpass('new passphrase: ')
+        if not pass_phrase or pass_phrase == '':
             print('you must supply a passphrase')
             sys.exit(1)
 
     # Neither the salt nor any IVs need be kept secret.
     salt = bytes(rng.someBytes(16))
-    key = bytes(PBKDF2(passPhrase, salt).read(32))     # 32-byte key
+    key = bytes(PBKDF2(pass_phrase, salt).read(32))     # 32-byte key
 
     # loop: verify that second passphrase matches first
     pp2 = getpass.getpass("Confirm passphrase: ")
-    while pp2 != passPhrase:
+    while pp2 != pass_phrase:
         # DEBUG
-        print("passphrase: %s" % passPhrase)
+        print("passphrase: %s" % pass_phrase)
         print("pp2:        %s" % pp2)
         # END
         print("second passphrase does not match first passphrase")
@@ -112,65 +117,65 @@ def handleInit(globalNS, subArgv, passPhrase):
     print("key: %s" % binascii.b2a_hex(key))
     # END
 
-    DESC = 'initialize magickSack'
-    parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
-    parser.add_argument('-H', '--usingSHA', choices=[1, 2, 3], default=2,
+    desc = 'initialize magickSack'
+    parser = ArgumentParser(description=desc, usage='magicSack init [options]')
+    parser.add_argument('-H', '--using_sha', choices=[1, 2, 3], default=2,
                         help='using SHA1 hash algorithm (default is SHA256)')
     parser.add_argument('-f', '--force', action='store_true',
                         help='overwrite any existing configuration')
-    parser.add_argument('-j', '--justShow', action='store_true',
+    parser.add_argument('-j', '--just_show', action='store_true',
                         help='show options and exit')
     parser.add_argument('-T', '--testing', action='store_true',
                         help='this is a test run')
     parser.add_argument('-t', '--title', type=str,
                         help='name of the magic sack (required)')
-    parser.add_argument('-u', '--uPath',
+    parser.add_argument('-u', '--u_path',
                         help='path to uDir (relative to tmp/ if testing)')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
-    args = parser.parse_args(subArgv, namespace=globalNS)
+    args = parser.parse_args(sub_argv, namespace=global_ns)
 
     # fixups
     args.key = key
     args.rng = rng
 
-    appName = globalNS.appName
-    defaultDir = globalNS.defaultDir
-    magicPath = globalNS.magicPath
+    app_name = global_ns.app_name
+    default_dir = global_ns.default_dir
+    magic_path = global_ns.magic_path
 
     force = args.force
     title = args.title
-    uPath = args.uPath
-    usingSHA = Q(args.usingSHA)
+    u_path = args.u_path
+    using_sha = Q(args.using_sha)
     verbose = args.verbose
 
     if args.testing:
         rng = SimpleRNG(time.time())
-        if magicPath == defaultDir:
-            magicPath = os.path.join('tmp', '.magicsack')
+        if magic_path == default_dir:
+            magic_path = os.path.join('tmp', '.magicsack')
         else:
             # XXX A MISTAKE:
-            magicPath = os.path.join('tmp', '.magicsack')
+            magic_path = os.path.join('tmp', '.magicsack')
     else:
         rng = SystemRNG()
 
     # sanity checks -------------------------------------------------
 
-    # magicPath --------------------------------------------
-    parts = magicPath.split('/')
+    # magic_path --------------------------------------------
+    parts = magic_path.split('/')
     for part in parts:
         if part == '.' or part == '..':
-            print("magicPath '%s' may not contain '%s'" % (magicPath, part))
+            print("magic_path '%s' may not contain '%s'" % (magic_path, part))
             sys.exit(1)
 
-    if os.path.exists(magicPath):
+    if os.path.exists(magic_path):
         if force:
-            shutil.rmtree(magicPath)
+            shutil.rmtree(magic_path)
         else:
-            print('%s already exists, add -f to continue' % magicPath)
+            print('%s already exists, add -f to continue' % magic_path)
             sys.exit(1)
     else:
-        os.makedirs(magicPath, mode=0o700, exist_ok=True)
+        os.makedirs(magic_path, mode=0o700, exist_ok=True)
 
     # title -----------------------------------------------
 
@@ -180,90 +185,95 @@ def handleInit(globalNS, subArgv, passPhrase):
 
     # uDir ------------------------------------------------
 
-    if not uPath or uPath == '':
-        uPath = os.path.join(magicPath, 'U')
-    args.uPath = uPath
+    if not u_path or u_path == '':
+        u_path = os.path.join(magic_path, 'U')
+    args.u_path = u_path
 
-    if os.path.exists(uPath):
+    if os.path.exists(u_path):
         if args.force:
-            shutil.rmtree(uPath)
+            shutil.rmtree(u_path)
         else:
-            print('%s already exists, add -f to continue' % uPath)
+            print('%s already exists, add -f to continue' % u_path)
             sys.exit(1)
-    globalNS.uDir = UDir.discover(uPath, mode=0o700)
+    global_ns.uDir = UDir.discover(u_path, mode=0o700)
 
-    # uPath/tmp --------------------------------------------
-    uPathTmp = os.path.join(uPath, 'tmp')
-    if os.path.exists(uPathTmp):
-        shutil.rmtree(uPathTmp)         # DANGEROUS
-    os.makedirs(uPathTmp, mode=0o700)
+    # u_path/tmp --------------------------------------------
+    u_path_tmp = os.path.join(u_path, 'tmp')
+    if os.path.exists(u_path_tmp):
+        shutil.rmtree(u_path_tmp)         # DANGEROUS
+    os.makedirs(u_path_tmp, mode=0o700)
 
     # convert salt to something json can handle
-    hexSalt = binascii.b2a_hex(salt).decode('utf-8')
+    hex_salt = binascii.b2a_hex(salt).decode('utf-8')
 
     # DEBUG
-    print("hexSalt = %s" % hexSalt)
+    print("hex_salt = %s" % hex_salt)
     # END
 
     # display command line values -----------------------------------
     if verbose:
         print("force        = %s" % force)
-        print("magicPath     = %s" % magicPath)
-        print("salt         = %s" % hexSalt)
+        print("magic_path   = %s" % magic_path)
+        print("salt         = %s" % hex_salt)
         print("title        = %s" % title)
-        print("uPath        = %s" % uPath)
+        print("u_path       = %s" % u_path)
         print("verbose      = %s" % verbose)
 
     # ACTION --------------------------------------------------------
 
-    # write configuration to magicPath ---------------------
-    cfg = {'salt': hexSalt, 'uPath': uPath}
-    jCfg = json.dumps(cfg, indent=2, sort_keys=True)
+    # write configuration to magic_path ---------------------
+    cfg = {'salt': hex_salt, 'u_path': u_path}
+    json_cfg = json.dumps(cfg, indent=2, sort_keys=True)
     # DEBUG
-    print("JSON: %s" % jCfg)
+    print("JSON: %s" % json_cfg)
     # END
-    configFile = os.path.join(magicPath, 'cfg.json')
-    with open(configFile, 'w') as f:
-        f.write(jCfg)
+    config_file = os.path.join(magic_path, 'cfg.json')
+    with open(config_file, 'w') as file:
+        file.write(json_cfg)
 
     # write the puzzle file -------------------------------
-    puzzle = devisePuzzle(passPhrase, salt, rng)
-    pathToPuzzle = os.path.join(magicPath, 'p')
-    with open(pathToPuzzle, 'wb') as f:
-        f.write(puzzle)
+    puzzle = devise_puzzle(pass_phrase, salt, rng)
+    path_to_puzzle = os.path.join(magic_path, 'p')
+    with open(path_to_puzzle, 'wb') as file:
+        file.write(puzzle)
 
     # DEBUG
-    print("puzzle written to %s" % pathToPuzzle)
+    print("puzzle written to %s" % path_to_puzzle)
     # END
 
     # generate two 2048 bit RSA private keys --------------
-    ckPriv = RSA.generate(2048)
-    ckPrivPem = ckPriv.exportKey('PEM')
+    ck_priv = RSA.generate(2048)
+    ck_priv_pem = ck_priv.exportKey('PEM')
 
-    skPriv = RSA.generate(2048)
-    skPrivPem = ckPriv.exportKey('PEM')
-    sk = skPriv.publickey()
+    sk_priv = RSA.generate(2048)
+    sk_priv_pem = ck_priv.exportKey('PEM')
+    sk_ = sk_priv.publickey()
 
     # create and populate NLHTree -------------------------
-    tree = NLHTree(nameFromTitle(title), usingSHA)
-    tree.insert(makeNamedValueLeaf(args, '__ckPrivPem__', ckPrivPem))
-    tree.insert(makeNamedValueLeaf(args, '__skPrivPem__', skPrivPem))
-    args.magicPath = magicPath
-    args.sk = sk
-    args.skPriv = skPriv
+    tree = NLHTree(nameFromTitle(title), using_sha)
+    tree.insert(make_named_value_leaf(args, '__ck_priv_pem__', ck_priv_pem))
+    tree.insert(make_named_value_leaf(args, '__sk_priv_pem__', sk_priv_pem))
+    args.magic_path = magic_path
+    args.sk = sk_
+    args.sk_priv = sk_priv
     args.title = title
     args.tree = tree
-    writeBuildList(args)
+    write_build_list(args)
 
 # == destroy ========================================================
 
+BLOCKSIZE = 4096
+CHAR = 0x74
+COMP = 0xff & (~CHAR)
 
-def handleDestroy(globalNS, subArgv):
 
-    DESC = 'erasing magickSack data from this machine'
-    parser = ArgumentParser(description=DESC, usage='magicSack init [options]')
+def handle_destroy(global_ns, sub_argv):
+    """ Execute the destroy subcommand. """
 
-    parser.add_argument('-j', '--justShow', action='store_true',
+    desc = 'erasing magickSack data from this machine'
+    parser = ArgumentParser(description=desc, usage='magicSack init [options]')
+
+    parser.add_argument('-j', '--just_show', action='store_true',
                         help='show options and exit')
     parser.add_argument('-T', '--testing', action='store_true',
                         help='this is a test run')
@@ -271,15 +281,15 @@ def handleDestroy(globalNS, subArgv):
                         help='talk as little as possible')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
-    args = parser.parse_args(subArgv, namespace=globalNS)
+    args = parser.parse_args(sub_argv, namespace=global_ns)
 
-    if args.verbose or args.justShow:
-        print("justShow   = %s" % args.justShow)
-        print("magicPath  = %s" % args.magicPath)   # DEBUG
+    if args.verbose or args.just_show:
+        print("just_show   = %s" % args.just_show)
+        print("magic_path  = %s" % args.magic_path)   # DEBUG
         print("testing    = %s" % args.testing)
         print("quietly    = %s" % args.quietly)
         print("verbose    = %s" % args.verbose)
-    if args.justShow:
+    if args.just_show:
         sys.exit(0)
 
     # get user confirmation
@@ -306,95 +316,99 @@ def handleDestroy(globalNS, subArgv):
 
     quietly = args.quietly
 
-    BLOCKSIZE = 4096
-    CHAR = 0x74
-    COMP = 0xff & (~CHAR)
-    CHARS = bytes([CHAR for i in range(BLOCKSIZE)])
-    COMPS = bytes([COMP for i in range(BLOCKSIZE)])
-    RND = SimpleRNG(time.time()).someBytes(BLOCKSIZE)
+    chars = bytes([CHAR for i in range(BLOCKSIZE)])
+    comps = bytes([COMP for i in range(BLOCKSIZE)])
+    rnd = SimpleRNG(time.time()).someBytes(BLOCKSIZE)
 
-    def scrubFile(pathToFile):
-        info = os.stat(pathToFile)
+    def scrub_file(path_to_file):
+        """
+        Overwrite a file several times, then delete it (following the
+        Federal standard).
+        """
+        info = os.stat(path_to_file)
         length = info.st_size
         count = int(0.000001 + (length + BLOCKSIZE - 1) / BLOCKSIZE)
-        with open(pathToFile, 'wb') as f:
-            for n in range(count):
-                f.write(CHARS)
-                f.flush()
-        with open(pathToFile, 'wb') as f:
-            for n in range(count):
-                f.write(COMPS)
-                f.flush()
-        with open(pathToFile, 'wb') as f:
-            for n in range(count):
-                f.write(RND)
-                f.flush()
-        os.remove(pathToFile)
+        with open(path_to_file, 'wb') as file:
+            for nbr in range(count):
+                file.write(chars)
+                file.flush()
+        with open(path_to_file, 'wb') as file:
+            for nbr in range(count):
+                file.write(comps)
+                file.flush()
+        with open(path_to_file, 'wb') as file:
+            for nbr in range(count):
+                file.write(rnd)
+                file.flush()
+        os.remove(path_to_file)
         if not args.quietly:
-            print("file %s has been scrubbed" % pathToFile)
+            print("file %s has been scrubbed" % path_to_file)
 
-    def scrubDir(pathToDir):
+    def scrub_dir(path_to_dir):
+        """
+        Scrub = overwrite and delete every file in a directory.
+        """
         if not quietly:
-            print("scrubbing %s" % globalNS.magicPath)
-        files = os.listdir(pathToDir)
+            print("scrubbing %s" % global_ns.magic_path)
+        files = os.listdir(path_to_dir)
         for file in files:
-            pathToFile = os.path.join(pathToDir, file)
-            if os.path.isdir(pathToFile):
-                scrubDir(pathToFile)
-            elif os.path.isfile(pathToFile):
-                scrubFile(pathToFile)
-            elif os.path.islink(pathToFile):
-                os.unlink(pathToFile)
+            path_to_file = os.path.join(path_to_dir, file)
+            if os.path.isdir(path_to_file):
+                scrub_dir(path_to_file)
+            elif os.path.isfile(path_to_file):
+                scrub_file(path_to_file)
+            elif os.path.islink(path_to_file):
+                os.unlink(path_to_file)
             else:
-                print("don't know how to handle %s" % pathToFile)
+                print("don't know how to handle %s" % path_to_file)
         if not quietly:
-            print("directory %s scrubbed" % pathToDir)
-        shutil.rmtree(pathToDir)
+            print("directory %s scrubbed" % path_to_dir)
+        shutil.rmtree(path_to_dir)
 
-    scrubDir(globalNS.magicPath)
+    scrub_dir(global_ns.magic_path)
 
     sys.exit(0)
 
 # == addFile ========================================================
 
 
-def handleAddFile(globalNS, subArgv):
+def handle_add_file(global_ns, sub_argv):
     """
     Prohibit adding files whose names begin with double-underscore ('__').
     """
 
     # DEBUG
-    print("entering handleAddFile")
+    print("entering handle_add_file")
     # END
 
-    DESC = 'add something to magickSack'
-    parser = ArgumentParser(description=DESC)
+    desc = 'add something to magickSack'
+    parser = ArgumentParser(description=desc)
     parser.add_argument('-f', '--force', action='store_true',
                         help='overwrite any existing configuration')
-    parser.add_argument('-j', '--justShow', action='store_true',
+    parser.add_argument('-j', '--just_show', action='store_true',
                         help='show options and exit')
     parser.add_argument('-T', '--testing', action='store_true',
                         help='this is a test run')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='be chatty')
-    args = parser.parse_args(namespace=globalNS)
+    args = parser.parse_args(namespace=global_ns)
 
-    magicPath = globalNS.magicPath
+    magic_path = global_ns.magic_path
     verbose = args.verbose
 
     # echo back command line args -----------------------------------
 
-    appName = 'magicSack %s' % __version__
-    if args.verbose or args.justShow:
-        print("%s %s" % (appName, __version_date__))
+    app_name = 'magicSack %s' % __version__
+    if args.verbose or args.just_show:
+        print("%s %s" % (app_name, __version_date__))
 
-    if args.verbose or args.justShow:
-        print('justShow     = ' + str(args.justShow))
-        print('magicPath     = ' + str(magicPath))
+    if args.verbose or args.just_show:
+        print('just_show     = ' + str(args.just_show))
+        print('magic_path     = ' + str(magic_path))
         print('testing      = ' + str(args.testing))
         print('verbose      = ' + str(verbose))
 
-    if args.justShow:
+    if args.just_show:
         sys.exit(0)
 
     # ACTION --------------------------------------------------------
@@ -407,23 +421,26 @@ def handleAddFile(globalNS, subArgv):
 
 # == listFile =======================================================
 
-def handleListFile(globalNS, subArgv):
+def handleListFile(global_ns, sub_argv):
+    """ Execute the listFile command. """
     print('list: not yet implemented')
     sys.exit(0)
 
 
 # == showFile ======================================================
 
-def handleShowFile(globalNS, subArgv):
+def handle_show_file(global_ns, sub_argv):
+    """ Execute the showFile command. """
     print('show: not yet implemented')
     sys.exit(0)
 
 
 # == dropFile =======================================================
 
-def handleDropFile(globalNS, subArgv):
+def handle_drop_file(global_ns, sub_argv):
     """
-    Prohibit deleting files whose names begin with double-underscore ('__')
+    Handle the dropFile command, remembering to prohibit deleting files
+    whose names begin with double-underscore ('__').
     """
     print('drop: not yet implemented')
     sys.exit(0)
@@ -431,21 +448,27 @@ def handleDropFile(globalNS, subArgv):
 # == addPeer ========================================================
 
 
-def handleAddPeer(globalNS, subArgv):
+def handle_add_peer(global_ns, sub_argv):
+    """ Execute the addPeer command. """
+
     print('addPeer: not yet implemented')
     sys.exit(0)
 
 
 # == listPeer =======================================================
 
-def handleListPeer(globalNS, subArgv):
+def handle_list_peer(global_ns, sub_argv):
+    """ Execute the listPeer command. """
+
     print('listPeer: not yet implemented')
     sys.exit(0)
 
 
 # == dropPeer =======================================================
 
-def handleDropPeer(globalNS, subArgv):
+def handle_drop_peer(global_ns, sub_argv):
+    """ Execute the dropPeer command. """
+
     print('dropPeer: not yet implemented')
     sys.exit(0)
 
@@ -457,78 +480,78 @@ def main():
     The command line looks like
         magicSack [-m MAGIC_DIR] SUBCMD otherArgs
     So at the top level we peek at sys.argv[1].  If it's '-m' or
-    '--magicPath' we will collect it and its parameter here and
-    process sys.argv[4:] as subArgv.  Otherwise we process sys.argv[2:]
-    as subArgv in the subcommand.
+    '--magic_path' we will collect it and its parameter here and
+    process sys.argv[4:] as sub_argv.  Otherwise we process sys.argv[2:]
+    as sub_argv in the subcommand.
     """
 
-    funcMap = {
-        'init': handleInit,
-        'destroy': handleDestroy,
-        'addFile': handleAddFile,
+    func_map = {
+        'init': handle_init,
+        'destroy': handle_destroy,
+        'addFile': handle_add_file,
         'listFile': handleListFile,
-        'showFile': handleShowFile,
-        'dropFile': handleDropFile,
-        'addPeer': handleAddPeer,
-        'listPeer': handleListPeer,
-        'dropPeer': handleDropPeer,
+        'showFile': handle_show_file,
+        'dropFile': handle_drop_file,
+        'addPeer': handle_add_peer,
+        'listPeer': handle_list_peer,
+        'dropPeer': handle_drop_peer,
     }
     argv = sys.argv
 
-    defaultDir = os.path.join(os.getenv('HOME'), '.magicsack')
-    subCmdAt = 1
+    default_dir = os.path.join(os.getenv('HOME'), '.magicsack')
+    sub_cmd_at = 1
     if len(argv) >= 4:
-        if argv[1] == '-m' or argv[1] == '--magicPath':
-            subCmdAt = 3
+        if argv[1] == '-m' or argv[1] == '--magic_path':
+            sub_cmd_at = 3
 
     # DEBUG
-    print("SUB CMD AT %d" % subCmdAt)
+    print("SUB CMD AT %d" % sub_cmd_at)
     # END
 
-    DESC = 'command-line interface to the Magic Sack'
-    parser = ArgumentParser(description=DESC)
-    parser.add_argument('-m', '--magicPath', default=defaultDir, type=str,
-                        help='select folder/directory (default=%s)' % defaultDir)
+    desc = 'command-line interface to the Magic Sack'
+    parser = ArgumentParser(description=desc)
+    parser.add_argument('-m', '--magic_path', default=default_dir, type=str,
+                        help='select folder/directory (default=%s)' % default_dir)
     parser.add_argument('command',          # required
                         help='subCommand to be executed')
-    globalNS = parser.parse_args(sys.argv[1: subCmdAt + 1])
+    global_ns = parser.parse_args(sys.argv[1: sub_cmd_at + 1])
 
-    globalNS.appName = 'magicSack %s' % __version__
-    globalNS.defaultDir = defaultDir
+    global_ns.app_name = 'magicSack %s' % __version__
+    global_ns.default_dir = default_dir
 
-    subArgv = sys.argv[subCmdAt + 1:]
+    sub_argv = sys.argv[sub_cmd_at + 1:]
 
     # DEBUG
-    print("subArgv:")
-    for ndx, x in enumerate(subArgv):
-        print("  %d %s" % (ndx, x))
+    print("sub_argv:")
+    for ndx, txt in enumerate(sub_argv):
+        print("  %d %s" % (ndx, txt))
     # END
 
     # fixups
-    magicPath = globalNS.magicPath
-    globalNS.rng = SystemRNG()
+    magic_path = global_ns.magic_path
+    global_ns.rng = SystemRNG()
 
     # DEBUG
-    print("magicPath: %s" % magicPath)
+    print("magic_path: %s" % magic_path)
     # END
 
-    if not magicPath:
-        print("magicPath must be specified")
+    if not magic_path:
+        print("magic_path must be specified")
         sys.exit(1)
 
-    passPhrase = getpass.getpass('passphrase: ')
-    if not passPhrase or passPhrase == '':
+    pass_phrase = getpass.getpass('passphrase: ')
+    if not pass_phrase or pass_phrase == '':
         print('you must supply a passphrase')
         sys.exit(1)
-    globalNS.passPhrase = passPhrase
-    command = globalNS.command
+    global_ns.pass_phrase = pass_phrase
+    command = global_ns.command
     if command == 'init':
-        handleInit(globalNS, subArgv, passPhrase)
+        handle_init(global_ns, sub_argv, pass_phrase)
     else:
-        if not verifyPassPhrase(globalNS, passPhrase):
+        if not verify_pass_phrase(global_ns, pass_phrase):
             print('that was not the right passphrase!')
             sys.exit(1)
-        funcMap[command](globalNS, subArgv)
+        func_map[command](global_ns, sub_argv)
 
 if __name__ == '__main__':
     main()

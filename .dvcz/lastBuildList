@@ -7,29 +7,30 @@ zPjEShF9rvcNa9XEy1dKpcDz9Szbm2SlxOgM83fDDGtOq4SSCSqndtxrOvXXPB57
 H1mJV/FmerbXRPm5ERJVNIxtLk7Gr2Ce45FVlWyJGMhpfVlKkkk+bRQ02OFfazJI
 GQIDAQAB
 -----END RSA PUBLIC KEY-----
-magicsack v0.3.1
-2016-09-12 19:10:20
+magicsack v0.4.0
+2016-10-06 01:48:53
 # BEGIN CONTENT #
 magicsack
  .dvcz
-  builds 6eb0ece35dbe22979da5565cac4cc3a8c7bf23a1
+  builds 6bf6aad51f4865be60b869d3697cad8f070b3c00
   copyright 803f3e50518123ef8a08d34f2238e89b62d0c9a2
   fileMap a22693715232155fcac1950c9ec41535bc05612e
   fileMap.local 4c7d7878a60c62fa4a358ba8409e89c2f3b76818
-  lastBuildList 8e05b56dc36977e43681c3b5f78b66b10d17247f
+  lastBuildList b6f214a2367ddcf06bc75c21f942a4950382b2de
   license 5977a55c75bb4612004451a56b0b4c22d9d3311d
-  projCfg 466f4b4e0aada5df556cecb1f8827beb525865f2
+  projCfg 0ad3dd9d63149dfec8af5b08f3aecb74a43d9564
   projCfg.local d289138451c5f67d916cf200cdce48ab8d7b1260
-  version 726b62c255b66d25493a3c28e7df3c402e00007a
+  version ffa8c2f9b3dda870c171665be350536b03d736f3
  .gitignore 2bc4bcb7826ea9b5fb999444fe18f6785df1de72
- CHANGES 29376714a34841337fe52af4c5deb31508402b1e
+ CHANGES 1e8aad7001c1f56ccf40e6b007fafa5ee851fd03
  LICENSE-MIT.md d1cecfadc47b23486f6bc8a863cfdde348c3eb46
  M 391952e239e611a326a10f64b153779656e3ea3a
  MANIFEST.in 4b024c0d0e8cb1329ea767cdd0858c4984849b97
  README.md bb846f96b85645e4ce475ed501005de8e88470e5
- TODO de67f976d1dc3e0ba8d9c6b116457b799747c950
- bkp2U 046747f38022b0fa5fecdc487352d3d6b2128af2
- countem b8d5e64d94cc496510f9335bac11e95c8eb32dfa
+ TODO e797739162c1801bc61cb71fa49637d8195fbbed
+ bkp2U 10001621f694f913c167dc5e73c288526d4323be
+ checkCoverage b3c6ba3dcb3548921187113452dac7b77bb3e43c
+ countem 7b0db6bfb502642620f270147476dfbe999f1558
  dist
   magicsack-0.2.0.tar.gz f503d3a8852d2df74483fb7d6a6f2c3bcd30dd4b
   magicsack-0.2.1.tar.gz 9bb70c9c6aa23d8a2a84d144f0488278cd89d3b3
@@ -57,6 +58,8 @@ magicsack
   magicsack-0.2.9.tar.gz 10aef1df3dd1e7141e3c8fb5b810950461062281
   magicsack-0.3.0.tar.gz 1626b2048cbbae8e2f6c68c57192589a3349859b
   magicsack-0.3.1.tar.gz 0cbac8f04854e87c40a105ddbdb600f012fcd374
+  magicsack-0.4.0.tar.gz 23d2a9a1ffb4657472d7513655841d5e84d1e81f
+ doPyLint c32cfb9d2897e463be165d73aae942af412c5a45
  ghpDoc
   css
    LICENSE.html5-boilerplate.md ded771b3245b190da0e81c76de5a80d41392c0a6
@@ -73,13 +76,14 @@ magicsack
    xlattice-2014.jpg f185aaad06db71acd9454f31054c62c56d36f37f
   index.md abc6c1d412944e13e4017ab53bcc61d8bd418632
  installit e6894c052702baebbaa1a2a99bb727b997a87521
- magicSack ce7c1559b4d9e1057811b3624e6b39a3169521c1
+ magicSack 3c02661101eb466a11b1e4cac1c371374ae1dd9c
  magicsack
-  __init__.py 58b286b623ae7a28ce73916b6e3fd34078f9153b
- setup.py 0df618d06af7956b4aa664d70282c1a9d06a7625
+  __init__.py 990bb248fbb78fe2ecbe0fcec7695569c691e587
+ pylintrc dd234fda24a547a9071f1e4608a3c1f3b7de9aa0
+ setup.py d8ccba013d9e16addc798f9e225bd5609e16caf9
  styleit f982f13d294ff9ba779df715ff4804638c0085d1
- test.all daec9725cbb5e415f1f855ced1e65b46d92f2600
- testPuzzle.py 432298ac3ea90ae31b542fa31d99c65366ec0360
+ test.all 207facc295e5745a02b6e8f731c31a938136d935
+ test_puzzle.py ac0a6930a7d49e5d5ad11cd98ec85af0e20dd37a
 # END CONTENT #
 
-Euec4x4roLA4Vkb97zCsaFsmeAD4q9ShanxLgYfkoFNdtSroX17vnDv4QzkY4/qgGvMkvxqr6XIW5DwhaiRZ0oPmcM2WNoqjF+FJssDI7ORbpsyGgOYfm+kh6rxItjy+FTVu5HSogmUp+37/weRdjtwNTD7tKODA/zzOUZ8+n4SU3lBFYa35wy3eGZaEtj9v5azXhsdw0C1mI6xfZz0WgvgE5yZfUESTi9nrYNlSFc2rh7nz9iWaod6JuTl2MEk21Pz3OBL0eRhxxx8JdKIVKJYEgXCDQTZa65O3NuWjAB5NsaqsI9X1lhtN7gtnKYF8HZnjxw08AL2hT1jZZSgAPg==
+OvfaSQSGKVmAbvIlcIfBhTBjnT/6c5KUJFIfbIHkM+jU3Xw5tw2M727J5g86CbOdsWJM3qPdmQ40pZ7pL03iuZclUKcxd/2P6HHJpBxo5AfKHJC3S8RZFKXYiWqTwb1G71dWjJl+VVgOqcJtu3ahIkcW8tsZmsZ5CMh+KmrvGz2/hEPAsMFne71GDCKNQPrM7TAhIkAIVsho8s7s+4gDPRiS+MmegpKTt0qHwByN781qthDTKFEtgtR9t5agtyTKkLyRkhfCosk6H9rGk7xKTqNKTyEid4/OYpztCdmhmDtFWX60VIh0MTaEapf1hWbZqPkuH7oKRcjSfpPG0xZRNw==
