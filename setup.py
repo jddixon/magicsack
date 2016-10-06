@@ -1,10 +1,11 @@
 #!/usr/bin/python3
-
 # magicsack/setup.py
+
+""" Set up distutils for the magicSack """
 
 import re
 from distutils.core import setup
-__version__ = re.search("__version__\s*=\s*'(.*)'",
+__version__ = re.search(r"__version__\s*=\s*'(.*)'",
                         open('magicsack/__init__.py').read()).group(1)
 
 # see http://docs.python.org/distutils/setupscript.html
@@ -25,5 +26,4 @@ setup(name='magicsack',
           'License :: OSI Approved :: MIT License',
           'Natural Language :: English',
           'Programming Language :: Python 3',
-      ],
-      )
+      ])

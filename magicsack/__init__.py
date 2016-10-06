@@ -1,5 +1,7 @@
 # magicsack/__in(it__.py
 
+""" Library for the Magic Sack. """
+
 import binascii
 import hashlib
 import os
@@ -13,41 +15,47 @@ from buildList import BuildList
 from nlhtree import NLHLeaf
 from xlattice import u256 as u
 from xlattice.crypto import (
-    AES_BLOCK_SIZE, addPKCS7Padding, stripPKCS7Padding)
+    AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding)
 
 __all__ = ['__version__', '__version_date__',
-           'checkPuzzle',
-           'devisePuzzle',
-           'generateKey',
-           'makeNamedValueLeaf', 'nameFromTitle',
-           'writeBuildList',
+           'check_puzzle',
+           'devise_puzzle',
+           'generate_key',
+           'make_named_value_leaf', 'name_from_title',
+           'write_build_list',
            ]
 
-__version__ = '0.3.1'
-__version_date__ = '2016-09-12'
+__version__ = '0.4.0'
+__version_date__ = '2016-10-05'
 
 
 class Config(object):
+    """ Configuration information. """
 
-    def __init__(self, salt, uDir):
+    def __init__(self, salt, u_dir):
         self._salt = salt
-        self._uDir = uDir
+        self._u_dir = u_dir
 
     @property
-    def salt(self): return self._salt
+    def salt(self):
+        """ Return the salt (some random bytes to confuse hackers). """
+        return self._salt
 
     @property
-    def uDir(self): return self._uDir
+    def u_dir(self):
+        """ Path to the store. """
+        return self._u_dir
 
 
 class MagicSackError(RuntimeError):
+    """ Wrapper for errors associated with this package. """
     pass
 
 
-def nameFromTitle(title):
+def name_from_title(title):
     """ convert a title into an acceptable directory name """
-    s = title.strip()           # strip off lealding & trailing blanks
-    chars = list(s)             # atomize the title
+    txt = title.strip()           # strip off lealding & trailing blanks
+    chars = list(txt)             # atomize the title
     for ndx, char in enumerate(chars):
         if char == ' ':
             chars[ndx] = '_'
@@ -63,168 +71,176 @@ def nameFromTitle(title):
     return ''.join(chars)
 
 
-def generateKey(passPhrase, salt, count=1000):
+def generate_key(pass_phrase, salt, count=1000):
     """
-    passPhrase is a string which may not be empty.  salt is a
+    pass_phrase is a string which may not be empty.  salt is a
     byte array, conventionally either 8 or 16 bytes.  The
     key returned is a 256-bit value.
     """
-    if not passPhrase or passPhrase == '':
-        raise RuntimeError("empty passPhrase")
+    if not pass_phrase or pass_phrase == '':
+        raise RuntimeError("empty pass_phrase")
     if not salt or len(salt) == 0:
         raise RuntimeError("you must supply a salt")
     # it is also possible to set the hash function used; it defaults
     # to HMAC-SHA1
-    return PBKDF2(passPhrase, salt, iterations=count).read(32)
+    return PBKDF2(pass_phrase, salt, iterations=count).read(32)
 
 
-def devisePuzzle(passPhrase, salt, rng, count=1000):
-    key = generateKey(passPhrase, salt, count)
+def devise_puzzle(pass_phrase, salt, rng, count=1000):
+    """
+    Create the puzzle that the user has to solve (provide a key for)
+    in order to access the Magic Sack.
+    """
+
+    key = generate_key(pass_phrase, salt, count)
     junk = rng.someBytes(2 * AES_BLOCK_SIZE)
-    iv = bytes(junk[:AES_BLOCK_SIZE])
+    iv_ = bytes(junk[:AES_BLOCK_SIZE])
     junk0 = junk[AES_BLOCK_SIZE: AES_BLOCK_SIZE + 8]
     junk2 = junk[AES_BLOCK_SIZE + 8:]
 
     data = junk0 + salt + junk2
-    padded = bytes(addPKCS7Padding(data, AES_BLOCK_SIZE))
+    padded = bytes(add_pkcs7_padding(data, AES_BLOCK_SIZE))
 
     # DEBUG
-    # print("devisePuzzle:")
+    # print("devise_puzzle:")
     #print("  key       %s" % binascii.b2a_hex(key))
-    #print("  iv        %s" % binascii.b2a_hex(iv))
+    #print("  iv_        %s" % binascii.b2a_hex(iv_))
     #print("  salt      %s" % binascii.b2a_hex(salt))
     #print("  padded    %s" % binascii.b2a_hex(padded))
     # END
 
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    puzzle = bytes(iv + cipher.encrypt(padded))
+    cipher = AES.new(key, AES.MODE_CBC, iv_)
+    puzzle = bytes(iv_ + cipher.encrypt(padded))
 
     return puzzle
 
 
-def checkPuzzle(puzzle, passPhrase, salt, count=1000):
+def check_puzzle(puzzle, pass_phrase, salt, count=1000):
     """
     Determine the key then decipher the puzzle, verifying that
     the copy of the salt embedded in the puzzle is the same as
     the salt from the config file.  Return whether verification
     succeeded.
     """
-    key = generateKey(passPhrase, salt, count)
+    key = generate_key(pass_phrase, salt, count)
 
-    iv = puzzle[:AES_BLOCK_SIZE]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    iv_ = puzzle[:AES_BLOCK_SIZE]
+    cipher = AES.new(key, AES.MODE_CBC, iv_)
     decrypted = cipher.decrypt(puzzle[AES_BLOCK_SIZE:])
     # DEBUG
-    # print("checkPuzzle:")
+    # print("check_puzzle:")
     #print("  key       %s" % binascii.b2a_hex(key))
-    #print("  iv        %s" % binascii.b2a_hex(iv))
+    #print("  iv_       %s" % binascii.b2a_hex(iv_))
     #print("  salt      %s" % binascii.b2a_hex(salt))
     #print("  decrypted %s" % binascii.b2a_hex(decrypted))
     # END
-    data = stripPKCS7Padding(decrypted, AES_BLOCK_SIZE)
+    data = strip_pkcs7_padding(decrypted, AES_BLOCK_SIZE)
     soln = bytes(data[8:8 + AES_BLOCK_SIZE])
 
     return soln == salt, key
 
 
 # ACTIONS -----------------------------------------------------------
-def insertNamedValue(globalNS, name, data):
+def insert_named_value(global_ns, name, data):
     """
-    Pad and encrypt the data, writing the encrypted value into uDir.
+    Pad and encrypt the data, writing the encrypted value into u_dir.
     If successful, return an NLHLeaf.
     """
-    key = globalNS.key
-    rng = globalNS.rng
-    uPath = globalNS.uPath
-    usingSHA = globalNS.usingSHA1
+    key = global_ns.key
+    rng = global_ns.rng
+    u_path = global_ns.u_path
+    using_sha = global_ns.using_sha1
 
-    padded = addPKCS7Padding(data, AES_BLOCK_SIZE)
-    iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
+    iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
+    cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
 
     # hash and encrypt the data ---------------------------
     sha = hashlib.sha256()
     sha.update(encrypted)
-    binHash = sha.digest()
-    hexHash = binascii.b2a_hex(binHash).decode('utf-8')
+    bin_hash = sha.digest()
+    hex_hash = binascii.b2a_hex(bin_hash).decode('utf-8')
 
     # DEBUG
     print("len(encrypted) = %d" % len(encrypted))
-    print("len(hexHash)   = %d" % len(hexHash))
-    print("uPath          = %s" % uPath)
+    print("len(hex_hash)   = %d" % len(hex_hash))
+    print("u_path          = %s" % u_path)
     # END
 
-    # add the encrypted data to uDir -----------------------
-    length, hash = u.putData2(encrypted, uPath, hexHash)
-    if hexHash != hash:
+    # add the encrypted data to u_dir -----------------------
+    length, hash2 = u.putData2(encrypted, u_path, hex_hash)
+    if hex_hash != hash2:
         raise MagicSackError(
             "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
-                hash, hexHash))
+                hex_hash, hash2))
     if len(encrypted) != length:
         raise MagicSackError("length encrypted %d but %d bytes written" % (
             len(encrypted), length))
 
-    return binHash
+    return NLHLeaf(name, bin_hash)
 
 
-def makeNamedValueLeaf(globalNS, name, data):
+def make_named_value_leaf(global_ns, name, data):
+    """ Given its name and data, insert (name, hash) into the NLHTree. """
 
-    hash = insertNamedValue(globalNS, name, data)
-    return NLHLeaf(name, hash)
+    return insert_named_value(global_ns, name, data)
 
 
-def addAFile(globalNS, pathToFile, listPath=None):
+def add_a_file(global_ns, path_to_file, list_path=None):
     """
+
     Add the contents of a single file to the nlhTree and the content-keyed
-    store.  The file is located at 'pathToFile'.  Its name in the NLHTree
-    will be 'listPath'.  If listPath is not set, it defaults to pathToFile.
+    store.  The file is located at 'path_to_file'.  Its name in the NLHTree
+    will be 'list_path'.  If list_path is not set, it defaults to path_to_file.
 
     Return a possibly empty status string.
     """
-    rng = globalNS.rng
-    tree = globalNS.tree
-    uPath = globalNS.uPath
-    usingSHA = globalNS.usingSHA1
+    rng = global_ns.rng
+    tree = global_ns.tree
+    u_path = global_ns.u_path
+    using_sha = global_ns.using_sha1
     status = ''
 
-    if not os.path.exists(pathToFile):
-        status = 'file not found: %s' % pathToFile
+    # XXX AES KEY IS NOT KNOWN XXX
+
+    if not os.path.exists(path_to_file):
+        status = 'file not found: %s' % path_to_file
 
     if not status:
 
         # -----------------------------------------------------------
-        # XXX CRITICALLY THIS ASSUMES that the file can be read into memory
+        # NOTE CRITICALLY THIS ASSUMES that the file can be read into memory
         # as a single operation; chunking is not required.
         # -----------------------------------------------------------
 
         # read, pad, and encrypt the file -----------------
 
-        with open(pathToFile, 'rb') as f:
-            data = f.read()
-        padded = addPKCS7Padding(data, AES_BLOCK_SIZE)
-        iv = rng.someBytes(AES_BLOCK_SIZE)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+        with open(path_to_file, 'rb') as file:
+            data = file.read()
+        padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
+        iv_ = rng.someBytes(AES_BLOCK_SIZE)
+        cipher = AES.new(key, AES.MODE_CBC, iv_)
         encrypted = cipher.encrypt(padded)
 
-        # hash the file and add it to uDir ----------------
+        # hash the file and add it to u_dir ----------------
         sha = hashlib.sha256()
         sha.update(encrypted)
-        hexHash = sha.hexdigest()
+        hex_hash = sha.hexdigest()
 
-        length, hash = u.putData2(encrypted, uPath, hexHash)
+        length, hash = u.putData2(encrypted, u_path, hex_hash)
         if hash != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
-                hexHash, hash)
+                hex_hash, hash)
         if not status and len(encrypted) != length:
             status = "length encrypted %d but %d bytes written" % (
                 len(encrypted), length)
 
     if not status:
         # add the file to the NLHTree ---------------------
-        if not listPath:
-            listPath = pathToFile
-        leaf = NLHLeaf(listPath, hexHash)
+        if not list_path:
+            list_path = path_to_file
+        leaf = NLHLeaf(list_path, hex_hash)
         tree.insert(leaf)
 
     return status
@@ -232,61 +248,62 @@ def addAFile(globalNS, pathToFile, listPath=None):
 # BUILD LIST --------------------------------------------------------
 
 
-def writeBuildList(globalNS):
-    key = globalNS.key
-    magicPath = globalNS.magicPath
-    rng = globalNS.rng
-    sk = globalNS.sk
-    skPriv = globalNS.skPriv
-    title = globalNS.title
-    tree = globalNS.tree
-    buildList = BuildList(title, sk, tree)
+def write_build_list(global_ns):
+    """ Serialize the BuildList and write it to disk. """
+
+    key = global_ns.key
+    magic_path = global_ns.magic_path
+    rng = global_ns.rng
+    sk_ = global_ns.sk_
+    sk_priv_ = global_ns.sk_priv
+    title = global_ns.title
+    tree = global_ns.tree
+    build_list = BuildList(title, sk, tree)
 
     # sign build list, encrypt, write to disk -------------
-    buildList.sign(skPriv)
-    s = buildList.__str__()
+    build_list.sign(sk_priv_)
+    text = build_list.__str__()
     # DEBUG
-    print("BUILD LIST:\n%s" % s)
+    print("BUILD LIST:\n%s" % text)
     # END
-    padded = addPKCS7Padding(s.encode('utf-8'), AES_BLOCK_SIZE)
-    iv = bytes(rng.someBytes(AES_BLOCK_SIZE))
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    padded = add_pkcs7_padding(s.encode('utf-8'), AES_BLOCK_SIZE)
+    iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
+    cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
-    pathToBL = os.path.join(magicPath, 'b')
-    with open(pathToBL, 'wb') as f:
-        f.write(encrypted)
+    path_to_build_list = os.path.join(magic_path, 'b')
+    with open(path_to_build_list, 'wb') as file:
+        file.write(encrypted)
 
 
-def readBuildList(globalNS):
-    """
-    """
-    key = globalNS.key
-    magicPath = globalNS.magicPath
-    rng = globalNS.rng
-    uPath = globalNS.uPath
-    usingSHA = globalNS.usingSHA1
+def read_build_list(global_ns):
+    """ Read a serialized BuildList from the disk.  """
+    key = global_ns.key
+    magic_path = global_ns.magic_path
+    rng = global_ns.rng
+    u_path = global_ns.u_path
+    using_sha = global_ns.using_sha1
 
-    pathToBL = os.path.join(magicPath, 'b')
-    with open(pathToBL, 'rb') as f:
-        data = f.read()
-    iv = data[:AES_BLOCK_SIZE]
+    path_to_build_list = os.path.join(magic_path, 'b')
+    with open(path_to_build_list, 'rb') as file:
+        data = file.read()
+    iv_ = data[:AES_BLOCK_SIZE]
     ciphertext = data[AES_BLOCK_SIZE]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key, AES.MODE_CBC, iv_)
     plaintext = cipher.decrypt(ciphertext)
-    s = stripPKCS7Padding(plaintext).decode('utf-8')
-    buildList = BuildList.parse(s, usingSHA)
-    if not buildList.verify():
+    text = strip_pkcs7_padding(plaintext).decode('utf-8')
+    build_list = BuildList.parse(text, using_sha)
+    if not build_list.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
 
-    globalNS.timestamp = buildList.timestamp
-    globalNS.title = buildList.title
-    globalNS.tree = buildList.tree
+    global_ns.timestamp = build_list.timestamp
+    global_ns.title = build_list.title
+    global_ns.tree = build_list.tree
 
-    # retrieve __ckPriv__ and __skPriv__ hashes from the BuildList, and
-    # use these to extract their binary values from uDir
+    # retrieve __ckPriv__ and __sk_priv__ hashes from the BuildList, and
+    # use these to extract their binary values from u_dir
     # Retrieve any top-level leaf nodes whose names begin with double
     # underscores ('__').  Regard these as reserved names.  For any
-    # such keys, add the key/value combination to globalNS, where the
-    # value is a hexHash.
+    # such keys, add the key/value combination to global_ns, where the
+    # value is a hex_hash.
 
-    # XXX STUB XXX
+    # NOTE STUB NOTE

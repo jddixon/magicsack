@@ -1,0 +1,2 @@
+pylint setup.py magicSack test*.py magicsack
+
