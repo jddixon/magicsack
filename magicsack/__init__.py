@@ -11,7 +11,7 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 
-from buildList import BuildList
+from buildlist import BuildList
 from nlhtree import NLHLeaf
 from xlattice import u256 as u
 from xlattice.crypto import (
@@ -25,8 +25,8 @@ __all__ = ['__version__', '__version_date__',
            'write_build_list',
            ]
 
-__version__ = '0.4.0'
-__version_date__ = '2016-10-05'
+__version__ = '0.4.1'
+__version_date__ = '2016-10-25'
 
 
 class Config(object):
@@ -149,7 +149,7 @@ def insert_named_value(global_ns, name, data):
     key = global_ns.key
     rng = global_ns.rng
     u_path = global_ns.u_path
-    using_sha = global_ns.using_sha1
+    using_sha = global_ns.using_sha
 
     padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
     iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
@@ -178,7 +178,7 @@ def insert_named_value(global_ns, name, data):
         raise MagicSackError("length encrypted %d but %d bytes written" % (
             len(encrypted), length))
 
-    return NLHLeaf(name, bin_hash)
+    return NLHLeaf(name, bin_hash, using_sha)
 
 
 def make_named_value_leaf(global_ns, name, data):
@@ -196,10 +196,11 @@ def add_a_file(global_ns, path_to_file, list_path=None):
 
     Return a possibly empty status string.
     """
+    key = global_ns.key
     rng = global_ns.rng
     tree = global_ns.tree
     u_path = global_ns.u_path
-    using_sha = global_ns.using_sha1
+    using_sha = global_ns.using_sha
     status = ''
 
     # XXX AES KEY IS NOT KNOWN XXX
@@ -228,10 +229,10 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         sha.update(encrypted)
         hex_hash = sha.hexdigest()
 
-        length, hash = u.putData2(encrypted, u_path, hex_hash)
-        if hash != key:
+        length, hash_back = u.putData2(encrypted, u_path, hex_hash)
+        if hash_back != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
-                hex_hash, hash)
+                hex_hash, hash_back)
         if not status and len(encrypted) != length:
             status = "length encrypted %d but %d bytes written" % (
                 len(encrypted), length)
@@ -240,8 +241,8 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         # add the file to the NLHTree ---------------------
         if not list_path:
             list_path = path_to_file
-        leaf = NLHLeaf(list_path, hex_hash)
-        tree.insert(leaf)
+        leaf = NLHLeaf(list_path, hex_hash, using_sha)
+        tree.insert(leaf, using_sha)
 
     return status
 
@@ -258,7 +259,7 @@ def write_build_list(global_ns):
     sk_priv_ = global_ns.sk_priv
     title = global_ns.title
     tree = global_ns.tree
-    build_list = BuildList(title, sk, tree)
+    build_list = BuildList(title, sk_, tree)
 
     # sign build list, encrypt, write to disk -------------
     build_list.sign(sk_priv_)
@@ -266,11 +267,11 @@ def write_build_list(global_ns):
     # DEBUG
     print("BUILD LIST:\n%s" % text)
     # END
-    padded = add_pkcs7_padding(s.encode('utf-8'), AES_BLOCK_SIZE)
+    padded = add_pkcs7_padding(text.encode('utf-8'), AES_BLOCK_SIZE)
     iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
-    path_to_build_list = os.path.join(magic_path, 'b')
+    path_to_build_list = os.path.join(magic_path, 'bVal')
     with open(path_to_build_list, 'wb') as file:
         file.write(encrypted)
 
@@ -281,16 +282,16 @@ def read_build_list(global_ns):
     magic_path = global_ns.magic_path
     rng = global_ns.rng
     u_path = global_ns.u_path
-    using_sha = global_ns.using_sha1
+    using_sha = global_ns.using_sha
 
-    path_to_build_list = os.path.join(magic_path, 'b')
+    path_to_build_list = os.path.join(magic_path, 'bVal')
     with open(path_to_build_list, 'rb') as file:
         data = file.read()
     iv_ = data[:AES_BLOCK_SIZE]
     ciphertext = data[AES_BLOCK_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     plaintext = cipher.decrypt(ciphertext)
-    text = strip_pkcs7_padding(plaintext).decode('utf-8')
+    text = strip_pkcs7_padding(plaintext, AES_BLOCK_SIZE).decode('utf-8')
     build_list = BuildList.parse(text, using_sha)
     if not build_list.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
