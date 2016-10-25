@@ -1,5 +1,11 @@
 ~/dev/py/magicksack/TODO
 
+2016-10-25
+    * pylint primary problem now dox
+    * need to rename magicSack
+
+2016-10-06
+    * checkCoverage returns for eg pyCrypto
 2016-10-05
     * dropy pyCrypto
     * u_dir is sometimes a path, sometimes an object
