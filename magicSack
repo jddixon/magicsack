@@ -6,23 +6,28 @@
 import binascii
 import getpass
 import json
-import os
 import shutil
 import sys
 import time
 from argparse import ArgumentParser
 
-from pbkdf2 import PBKDF2       # note name of package is u/c
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA        # presumably SHA1
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_PSS
+import os
+try:
+    from os import scandir
+except ImportError:
+    from scandir import scandir
 
-from buildList import BuildList
+from pbkdf2 import PBKDF2       # note name of package is u/c
+# from Crypto.Cipher import AES
+# from Crypto.Hash import SHA        # presumably SHA1
+from Crypto.PublicKey import RSA
+# from Crypto.Signature import PKCS1_PSS
+
+# from buildlist import BuildList
 from nlhtree import NLHTree
 from rnglib import SimpleRNG, SystemRNG
 from xlattice import QQQ
-from xlattice.crypto import AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding
+# from xlattice.crypto import AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding
 from xlattice.u import UDir
 from xlattice.ui import confirm_y_or_n, passwd_strength
 from magicsack import(__version__, __version_date__,
@@ -46,12 +51,9 @@ def verify_pass_phrase(global_ns, pass_phrase):
     if not os.path.exists(config_file):
         print("%s does not exist; cannot continue" % config_file)
         sys.exit(1)
-    try:
-        with open(config_file, 'r') as file:
-            data = file.read()
-    except Exception as exc:
-        print("error reading configuration file: %s" % exc)
-        sys.exit(1)
+    with open(config_file, 'r') as file:
+        # let any exceptions bubble up
+        data = file.read()
     try:
         cfg = json.loads(data)
     except Exception as exc:
@@ -80,7 +82,7 @@ def verify_pass_phrase(global_ns, pass_phrase):
     #print("puzzle read from disk (%d bytes):" % len(puzzle))
     #print("%s" % binascii.b2a_hex(puzzle))
     # END
-    ok_ = check_puzzle(puzzle, pass_phrase, global_ns.salt)
+    ok_, _ = check_puzzle(puzzle, pass_phrase, global_ns.salt)
 
     return ok_
 
@@ -158,6 +160,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
             # XXX A MISTAKE:
             magic_path = os.path.join('tmp', '.magicsack')
     else:
+        # pylint: disable=redefined-variable-type
         rng = SystemRNG()
 
     # sanity checks -------------------------------------------------
@@ -334,7 +337,7 @@ def handle_destroy(global_ns, sub_argv):
                 file.write(chars)
                 file.flush()
         with open(path_to_file, 'wb') as file:
-            for nbr in range(count):
+            for _ in range(count):
                 file.write(comps)
                 file.flush()
         with open(path_to_file, 'wb') as file:
@@ -351,17 +354,15 @@ def handle_destroy(global_ns, sub_argv):
         """
         if not quietly:
             print("scrubbing %s" % global_ns.magic_path)
-        files = os.listdir(path_to_dir)
-        for file in files:
-            path_to_file = os.path.join(path_to_dir, file)
-            if os.path.isdir(path_to_file):
-                scrub_dir(path_to_file)
-            elif os.path.isfile(path_to_file):
-                scrub_file(path_to_file)
-            elif os.path.islink(path_to_file):
-                os.unlink(path_to_file)
+        for entry in scandir(path_to_dir):
+            if entry.is_dir():
+                scrub_dir(entry.path)
+            elif entry.is_file():
+                scrub_file(entry.path)
+            elif entry.is_symlink():
+                os.unlink(entry.path)
             else:
-                print("don't know how to handle %s" % path_to_file)
+                print("don't know how to handle %s" % entry.path)
         if not quietly:
             print("directory %s scrubbed" % path_to_dir)
         shutil.rmtree(path_to_dir)
@@ -422,7 +423,7 @@ def handle_add_file(global_ns, sub_argv):
 
 # == listFile =======================================================
 
-def handleListFile(global_ns, sub_argv):
+def handle_list_file(global_ns, sub_argv):
     """ Execute the listFile command. """
     print('list: not yet implemented')
     sys.exit(0)
@@ -490,7 +491,7 @@ def main():
         'init': handle_init,
         'destroy': handle_destroy,
         'addFile': handle_add_file,
-        'listFile': handleListFile,
+        'listFile': handle_list_file,
         'showFile': handle_show_file,
         'dropFile': handle_drop_file,
         'addPeer': handle_add_peer,

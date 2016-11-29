@@ -13,7 +13,6 @@ from Crypto.PublicKey import RSA
 
 from buildlist import BuildList
 from nlhtree import NLHLeaf
-from xlattice import u256 as u
 from xlattice.crypto import (
     AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding)
 
@@ -25,8 +24,8 @@ __all__ = ['__version__', '__version_date__',
            'write_build_list',
            ]
 
-__version__ = '0.4.1'
-__version_date__ = '2016-10-25'
+__version__ = '0.4.2'
+__version_date__ = '2016-11-29'
 
 
 class Config(object):
@@ -148,6 +147,7 @@ def insert_named_value(global_ns, name, data):
     """
     key = global_ns.key
     rng = global_ns.rng
+    u_dir = global_ns.u_dir
     u_path = global_ns.u_path
     using_sha = global_ns.using_sha
 
@@ -169,7 +169,7 @@ def insert_named_value(global_ns, name, data):
     # END
 
     # add the encrypted data to u_dir -----------------------
-    length, hash2 = u.putData2(encrypted, u_path, hex_hash)
+    length, hash2 = u_dir.put_data(encrypted, hex_hash)
     if hex_hash != hash2:
         raise MagicSackError(
             "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
@@ -199,7 +199,7 @@ def add_a_file(global_ns, path_to_file, list_path=None):
     key = global_ns.key
     rng = global_ns.rng
     tree = global_ns.tree
-    u_path = global_ns.u_path
+    u_dir = global_ns.u_dir
     using_sha = global_ns.using_sha
     status = ''
 
@@ -229,7 +229,7 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         sha.update(encrypted)
         hex_hash = sha.hexdigest()
 
-        length, hash_back = u.putData2(encrypted, u_path, hex_hash)
+        length, hash_back = u_dir.put_data(encrypted, hex_hash)
         if hash_back != key:
             status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
                 hex_hash, hash_back)
