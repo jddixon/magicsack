@@ -7,7 +7,7 @@
 2016-10-06
     * checkCoverage returns for eg pyCrypto
 2016-10-05
-    * dropy pyCrypto
+    * drop pyCrypto
     * u_dir is sometimes a path, sometimes an object
 
 2016-06-03
