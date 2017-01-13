@@ -26,8 +26,7 @@ from Crypto.PublicKey import RSA
 # from buildlist import BuildList
 from nlhtree import NLHTree
 from rnglib import SimpleRNG, SystemRNG
-from xlattice import QQQ
-# from xlattice.crypto import AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding
+from xlattice import HashTypes
 from xlattice.u import UDir
 from xlattice.ui import confirm_y_or_n, passwd_strength
 from magicsack import(__version__, __version_date__,
@@ -122,7 +121,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
 
     desc = 'initialize magickSack'
     parser = ArgumentParser(description=desc, usage='magicSack init [options]')
-    parser.add_argument('-H', '--using_sha', choices=[1, 2, 3], default=2,
+    parser.add_argument('-H', '--hashtype', choices=[1, 2, 3], default=2,
                         help='using SHA1 hash algorithm (default is SHA256)')
     parser.add_argument('-f', '--force', action='store_true',
                         help='overwrite any existing configuration')
@@ -149,7 +148,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
     force = args.force
     title = args.title
     u_path = args.u_path
-    using_sha = QQQ(args.using_sha)
+    hashtype = args.hashtype
     verbose = args.verbose
 
     if args.testing:
@@ -160,7 +159,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
             # XXX A MISTAKE:
             magic_path = os.path.join('tmp', '.magicsack')
     else:
-        # pylint: disable=redefined-variable-type
+        # pylint:disable=redefined-variable-type
         rng = SystemRNG()
 
     # sanity checks -------------------------------------------------
@@ -254,7 +253,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
     sk_ = sk_priv.publickey()
 
     # create and populate NLHTree -------------------------
-    tree = NLHTree(name_from_title(title), using_sha)
+    tree = NLHTree(name_from_title(title), hashtype)
     tree.insert(make_named_value_leaf(args, '__ck_priv_pem__', ck_priv_pem))
     tree.insert(make_named_value_leaf(args, '__sk_priv_pem__', sk_priv_pem))
     args.magic_path = magic_path

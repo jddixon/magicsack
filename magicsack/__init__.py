@@ -21,11 +21,10 @@ __all__ = ['__version__', '__version_date__',
            'devise_puzzle',
            'generate_key',
            'make_named_value_leaf', 'name_from_title',
-           'write_build_list',
-           ]
+           'write_build_list', ]
 
-__version__ = '0.4.2'
-__version_date__ = '2016-11-29'
+__version__ = '0.4.3'
+__version_date__ = '2017-01-13'
 
 
 class Config(object):
@@ -149,7 +148,7 @@ def insert_named_value(global_ns, name, data):
     rng = global_ns.rng
     u_dir = global_ns.u_dir
     u_path = global_ns.u_path
-    using_sha = global_ns.using_sha
+    hashtype = global_ns.hashtype
 
     padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
     iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
@@ -178,7 +177,7 @@ def insert_named_value(global_ns, name, data):
         raise MagicSackError("length encrypted %d but %d bytes written" % (
             len(encrypted), length))
 
-    return NLHLeaf(name, bin_hash, using_sha)
+    return NLHLeaf(name, bin_hash, hashtype)
 
 
 def make_named_value_leaf(global_ns, name, data):
@@ -200,7 +199,7 @@ def add_a_file(global_ns, path_to_file, list_path=None):
     rng = global_ns.rng
     tree = global_ns.tree
     u_dir = global_ns.u_dir
-    using_sha = global_ns.using_sha
+    hashtype = global_ns.hashtype
     status = ''
 
     # XXX AES KEY IS NOT KNOWN XXX
@@ -241,8 +240,8 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         # add the file to the NLHTree ---------------------
         if not list_path:
             list_path = path_to_file
-        leaf = NLHLeaf(list_path, hex_hash, using_sha)
-        tree.insert(leaf, using_sha)
+        leaf = NLHLeaf(list_path, hex_hash, hashtype)
+        tree.insert(leaf, hashtype)
 
     return status
 
@@ -282,7 +281,7 @@ def read_build_list(global_ns):
     magic_path = global_ns.magic_path
     rng = global_ns.rng
     u_path = global_ns.u_path
-    using_sha = global_ns.using_sha
+    hashtype = global_ns.hashtype
 
     path_to_build_list = os.path.join(magic_path, 'bVal')
     with open(path_to_build_list, 'rb') as file:
@@ -292,7 +291,7 @@ def read_build_list(global_ns):
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     plaintext = cipher.decrypt(ciphertext)
     text = strip_pkcs7_padding(plaintext, AES_BLOCK_SIZE).decode('utf-8')
-    build_list = BuildList.parse(text, using_sha)
+    build_list = BuildList.parse(text, hashtype)
     if not build_list.verify():
         raise MagicSackError("could not verify digital signature on BuildList")
 
