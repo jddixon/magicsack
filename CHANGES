@@ -1,5 +1,9 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.3
+    2017-01-13
+        * drop duplicate file testPuzzle.py
+        * modify to conform to xlattice_py API changes              SLOC 1206
 v0.4.2
     2016-11-29
         * replace listdir with scandir; more pylinting              SLOC 1444
@@ -103,6 +107,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 
