@@ -9,21 +9,16 @@
 </head>
 <body>
 <div class="content">
-<h1>
-<a id="user-content-magicsack" class="anchor" href="#magicsack" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>magicsack</h1>
+<h1 class="libTop">magicsack</h1>
 
 <p><strong>magicSack</strong> is a utility for storing secret things either <em>locally</em> (on the
 user's laptop or workstation) or
 <em>over a distributed set of cooperating servers</em> or on one of the
 <em>cloud services</em> or on some combination of the three.</p>
-
 <p>MagicSack is in development using Python 3 on Linux.  It should
 work on Windows as well, but no effort will be made to confirm this
 until the development version is stable on Linux.</p>
-
-<h2>
-<a id="user-content-technical-details" class="anchor" href="#technical-details" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Technical Details</h2>
-
+<h2>Technical Details</h2>
 <p>MagicSack is protected by a user-selected passphrase.  This is hashed
 using SHA256 and then the 256 bits of the hash are used as an AES
 key.  When documents are added to the system, the user supplies a unique
@@ -34,17 +29,13 @@ locally.  The encrypted documents may be stored locally or on one or more
 cooperating servers or on a cloud service or on any combination of the
 three.  The index is always digitally signed and AES-encrypted before
 being stored.</p>
-
 <p>The system generates two 2048-bit RSA keypairs.  One of these, <strong>skPriv</strong>,
 is used
 for creating digital signatures; specifically it is used for signing
 the index.  The other, <strong>ckPriv</strong>, is used for encrypting data while
 setting up communications with <strong>peers</strong>, hosts cooperating with
 <code>magicSack</code> in the storage of documents.</p>
-
-<h2>
-<a id="user-content-command-line" class="anchor" href="#command-line" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Command Line</h2>
-
+<h2>Command Line</h2>
 <pre><code>magicSack [-m DIR_NAME] init [-f] [-u U_Dir]
 magicSack [-m DIR_NAME] destroy
 magicSack [-m DIR_NAME] add      FILE [FILE]*
@@ -55,13 +46,9 @@ magicSack [-m DIR_NAME] addPeer  FQDN[:PORT] [FQDN[:PORT]]*
 magicSack [-m DIR_NAME] listPeer FQDN
 magicSack [-m DIR_NAME] dropPeer FQDN[:PORT] [FQDN[:PORT]]*
 </code></pre>
-
 <p>Each of these commands asks for the passphrase.  Except in the case
 of <code>init</code>, if the passphrase is wrong, the command will have no effect.</p>
-
-<h3>
-<a id="user-content-init" class="anchor" href="#init" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>init</h3>
-
+<h3>init</h3>
 <p>This command creates a new local instance, storing information under
 <code>.magicsack</code> in the user's home directory.  If the <code>.magicsack</code> directory
 aleady exists, the command will fail, unless the command line includes
@@ -69,93 +56,59 @@ the <code>-f</code> or <code>--force</code> option.  Unless otherwise specified 
 stored in
 <code>.magicsack/uDir</code>.  If the <code>-u</code> option is present, documents will be stored
 in <code>uDir</code> instead.</p>
-
 <p>The <code>init</code> command asks for a passphrase which then becomes the key
 for all information stored.</p>
-
 <p>This command is destructive.  Any existing information under <code>.magicsack</code>
 will be irrevocably deleted.</p>
-
 <p>If data is to be stored on the cloud, <code>uDir</code> <strong>must</strong> be specified and
 should be the path to a directory backed up on the cloud.  If that
 directory does not exist, <code>magicSack</code> will attempt to create it</p>
-
-<h3>
-<a id="user-content-destroy" class="anchor" href="#destroy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>destroy</h3>
-
+<h3>destroy</h3>
 <p>This command erases anything under <code>.magicsack</code>.  If <code>uDir</code> is not a
 subdirectory of <code>.magicsack</code>, <code>uDir</code> will be erased if the system permits.</p>
-
 <p>This operation is irrevocable.  If the correct passphrase is supplied,
 all information on the user's machine relating to the <code>magicSack</code>
 installation will be erased, unless somehow otherwise protected by
 the system.</p>
-
-<h3>
-<a id="user-content-add" class="anchor" href="#add" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>add</h3>
-
+<h3>add</h3>
 <p>The <code>add</code> command adds the files listed.  These are specified using <strong>globs</strong>,
 file name patterns.  So if for example <code>FILE</code> is <code>abc*</code>, then all local files
 whose names begin with <code>abc</code> will be added to magicsack.</p>
-
 <p>This is not a destructive operation.  That is, if a file is added, it will be
 copied into .magicsack, be the original will be unaffected.</p>
-
-<h3>
-<a id="user-content-list" class="anchor" href="#list" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>list</h3>
-
+<h3>list</h3>
 <p><code>list</code> is followed by zero or more globs (file name patterns).  If there
 are no globs, then
 the entire contents of the magicsack store will be listed.  Otherwise
 any file matching the pattern will be listed</p>
-
 <p>The listing contains only information about the document(s) requested,
 most importantly the document name (which may be a path) and size,
 where the size is the size before encryption.</p>
-
-<h3>
-<a id="user-content-show" class="anchor" href="#show" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>show</h3>
-
+<h3>show</h3>
 <p><code>show</code> must be followed by one or more globs (file name patterns).
 The contens of any file
 whose name or path matches the pattern(s) will be displayed.  In other
 words, this information will be sent to <code>stdout</code>, which may of course
 be directed to a file.</p>
-
-<h3>
-<a id="user-content-drop" class="anchor" href="#drop" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>drop</h3>
-
+<h3>drop</h3>
 <p>The <code>drop</code> command deletes any items matching the file name pattern(s)
 following from the store.  This action is irrevocable.</p>
-
-<h3>
-<a id="user-content-addpeer" class="anchor" href="#addpeer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>addPeer</h3>
-
+<h3>addPeer</h3>
 <p>This command adds a remote host (another machine that can be reached
 over the Internet) to the list of cooperating servers.  FQDN may be
 either a domain name or an IP address, a <strong>dotted quad</strong> like <code>1.2.3.4</code>.
 Either may optionally be followed by a port number.</p>
-
-<h3>
-<a id="user-content-listpeer" class="anchor" href="#listpeer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>listPeer</h3>
-
+<h3>listPeer</h3>
 <p>Lists domain name or IP address and port number where the name
 matches <code>FQDN</code> (a glob).  If <code>FQDN</code> is not present on the command line,
 all such peers are listed.</p>
-
-<h3>
-<a id="user-content-droppeer" class="anchor" href="#droppeer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>dropPeer</h3>
-
+<h3>dropPeer</h3>
 <p>Drops peers matching FQDN from the local list of cooperating peers.  This
 should be an eventually destructive act: the remote peers will at some
 point remove the data stored there, but there is no guarantee when this
 will occur.  (Remember that all data stored remotely is encrypted.)</p>
-
-<h2>
-<a id="user-content-project-status" class="anchor" href="#project-status" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Project Status</h2>
-
+<h2>Project Status</h2>
 <p>Pre-alpha.  Some working code, a few tests that succeed.</p>
-
 <h2>Licensing</h2>
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />The material on this github.io website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
 <p>Project software is licensed under an MIT license.
