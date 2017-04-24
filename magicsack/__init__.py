@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.3'
-__version_date__ = '2017-01-13'
+__version__ = '0.4.4'
+__version_date__ = '2017-04-24'
 
 
 class Config(object):
@@ -91,7 +91,7 @@ def devise_puzzle(pass_phrase, salt, rng, count=1000):
     """
 
     key = generate_key(pass_phrase, salt, count)
-    junk = rng.someBytes(2 * AES_BLOCK_SIZE)
+    junk = rng.some_bytes(2 * AES_BLOCK_SIZE)
     iv_ = bytes(junk[:AES_BLOCK_SIZE])
     junk0 = junk[AES_BLOCK_SIZE: AES_BLOCK_SIZE + 8]
     junk2 = junk[AES_BLOCK_SIZE + 8:]
@@ -151,7 +151,7 @@ def insert_named_value(global_ns, name, data):
     hashtype = global_ns.hashtype
 
     padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
-    iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
+    iv_ = bytes(rng.some_bytes(AES_BLOCK_SIZE))
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
 
@@ -219,7 +219,7 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         with open(path_to_file, 'rb') as file:
             data = file.read()
         padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
-        iv_ = rng.someBytes(AES_BLOCK_SIZE)
+        iv_ = rng.some_bytes(AES_BLOCK_SIZE)
         cipher = AES.new(key, AES.MODE_CBC, iv_)
         encrypted = cipher.encrypt(padded)
 
@@ -267,7 +267,7 @@ def write_build_list(global_ns):
     print("BUILD LIST:\n%s" % text)
     # END
     padded = add_pkcs7_padding(text.encode('utf-8'), AES_BLOCK_SIZE)
-    iv_ = bytes(rng.someBytes(AES_BLOCK_SIZE))
+    iv_ = bytes(rng.some_bytes(AES_BLOCK_SIZE))
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
     path_to_build_list = os.path.join(magic_path, 'bVal')

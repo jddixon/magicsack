@@ -25,6 +25,7 @@ from Crypto.PublicKey import RSA
 
 # from buildlist import BuildList
 from nlhtree import NLHTree
+from optionz import dump_options
 from rnglib import SimpleRNG, SystemRNG
 from xlattice import HashTypes
 from xlattice.u import UDir
@@ -264,6 +265,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
     write_build_list(args)
 
 # == destroy ========================================================
+
 
 BLOCKSIZE = 4096
 CHAR = 0x74
@@ -553,6 +555,7 @@ def main():
             print('that was not the right passphrase!')
             sys.exit(1)
         func_map[command](global_ns, sub_argv)
+
 
 if __name__ == '__main__':
     main()
