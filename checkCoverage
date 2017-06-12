@@ -9,4 +9,4 @@ nosetests \
     --cover-branches \
     --cover-inclusive  \
     --cover-package=magicsack   \
-    test*.py
+    tests/test*.py

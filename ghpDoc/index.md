@@ -12,7 +12,7 @@ until the development version is stable on Linux.
 ## Technical Details
 
 MagicSack is protected by a user-selected passphrase.  This is hashed
-using SHA256 and then the 256 bits of the hash are used as an AES
+using SHA256 and then the first 256 bits of the hash are used as an AES
 key.  When documents are added to the system, the user supplies a unique
 name and then the document is AES-encrypted using that key before storage.
 It should be possible to generate a different key for each document.  The

@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.5
+    2017-06-12
+        * restructure for pytest                                    SLOC 1393
 v0.4.4
     2017-04-24
         * drop dist/* from repo; plus minor edits                   SLOC 1423
@@ -110,6 +113,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 

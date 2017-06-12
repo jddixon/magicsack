@@ -1,2 +1,2 @@
-pylint setup.py magicSack test*.py magicsack
+pylint setup.py src/magicSack tests/test*.py src/magicsack
 

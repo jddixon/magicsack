@@ -6,7 +6,7 @@
 import re
 from distutils.core import setup
 __version__ = re.search(r"__version__\s*=\s*'(.*)'",
-                        open('magicsack/__init__.py').read()).group(1)
+                        open('src/magicsack/__init__.py').read()).group(1)
 
 # see http://docs.python.org/distutils/setupscript.html
 
@@ -15,9 +15,9 @@ setup(name='magicsack',
       author='Jim Dixon',
       author_email='jddixon@gmail.com',
       py_modules=[],
-      packages=['magicsack'],
+      packages=['src/magicsack'],
       # following could be in scripts/ subdir
-      scripts=['magicSack', ],
+      scripts=['src/magicSack', ],
       description='a place for secret things',
       url='https://jddixon.github.io/magicsack',
       classifiers=[
