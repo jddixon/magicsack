@@ -1,5 +1,0 @@
-# magicsack/renamePerAPI
-
-sdRenameInFiles -v1rw                   \
-    -m name-pairs-local                 \
-    setup.py magicsack/__init__.py magicSack test*.py

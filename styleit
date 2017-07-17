@@ -4,8 +4,8 @@ if [ ! -z "${DEV_BASE// }" ]
 then
   cd $DEV_BASE/py/magicsack
   
-  autopep8 -ai -r magicsack 
-  autopep8 -ai magicSack *.py
+  autopep8 -air src tests
+  autopep8 -ai  setup.py
   
 else
   echo "DEV_BASE is not defined"

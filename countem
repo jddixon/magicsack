@@ -6,7 +6,7 @@ then
   
   rm -rf build/* tmp/* 
   
-  pySloc -L py magicSack  -X cover -X htmlcov -X dist -v $@
+  pySloc -L py  -X cover -X htmlcov -X dist -v $@ magicsack magicSack tests/test_puzzle.py setup.py
 else
   echo "DEV_BASE is not defined"
 fi

@@ -7,31 +7,31 @@ Giaje1YAJPNVBt3dlOA5lhBp4GpSYBskJ9UR2Zyt3lgAGK3dEwxYETLMh9VWEV8i
 k2lyCIE/V/CDb9eVDYQgYSJYrnQ/JAPST7NbcY8aI+/0l7QVBhLBpmOCvmS6ofvz
 /QIDAQAB
 -----END PUBLIC KEY-----
-magicsack v0.4.4
-2017-04-24 21:27:34
+magicsack v0.4.6
+2017-07-17 19:18:17
 # BEGIN CONTENT #
 magicsack
  .dvcz
-  builds b628fbb06f14617ed549eae5714fd8ebc7ab86ef
+  builds f781b9dbd07058c9d07c534fbc89b102cf1abe23
   copyright 4d8d885e40d66a840aa68d7d17b7007f41270444
   fileMap a22693715232155fcac1950c9ec41535bc05612e
   fileMap.local 4c7d7878a60c62fa4a358ba8409e89c2f3b76818
-  lastBuildList f84e880b9f6fff9a9dc07b8a1b1b98c0538cbadc
+  lastBuildList ed23c51b0106140a6e715cdad8a955e90a8bfef1
   license 5977a55c75bb4612004451a56b0b4c22d9d3311d
-  projCfg 0ad3dd9d63149dfec8af5b08f3aecb74a43d9564
+  projCfg c80c21c427da0f8cb4859f57acf6bc8784206324
   projCfg.local d289138451c5f67d916cf200cdce48ab8d7b1260
-  version 28f5dbdf6dd4190ffa12ca5c970b87915d2db370
+  version 869506f358e043ec8e67fa87197d98976a8e1850
  .gitignore 5185a3cb0539828e50edfc25d60c80ae291197fa
- CHANGES 5024f9a7bd28e60672d2181d07531c7d96f2edf2
- LICENSE-MIT.md d1cecfadc47b23486f6bc8a863cfdde348c3eb46
+ CHANGES f31e65558851910cf377bab56b3cfd8e3a7bf60b
+ LICENSE-MIT.md dbe8833d7e1124b4e47613ba1e39a66ccc03dd80
  M 391952e239e611a326a10f64b153779656e3ea3a
- MANIFEST.in 4b024c0d0e8cb1329ea767cdd0858c4984849b97
- README.md bb846f96b85645e4ce475ed501005de8e88470e5
+ MANIFEST.in ab66c4ba9f7b7352eb828e32839a387bf990125b
+ README.md 5b4aa8931c97c2bcaaec51302feb43743f9de127
  TODO 1498ac9768cb46770fb3ce30a01ccbcfb3644224
  bkp2U b1f532eb462db45a673f56773723ad7f65abf101
- checkCoverage d6cc3f3ba2875306e5a69ae653893278fccadad3
- countem 7b0db6bfb502642620f270147476dfbe999f1558
- doPyLint c32cfb9d2897e463be165d73aae942af412c5a45
+ checkCoverage 63d48a1b715ff31b5a4262835e8c02e358fc86a3
+ countem 661a15fcd72949dcee4c827bfe44d7539e533f9f
+ doPyLint 31321ad99eb3b9ac0928a68c29a8b5b88c9472fb
  ghpDoc
   css
    LICENSE.html5-boilerplate.md ded771b3245b190da0e81c76de5a80d41392c0a6
@@ -46,19 +46,18 @@ magicsack
    simple-cluster.jpg 6b223ddd25937c1ef75ef328f36fc3436f10bd62
    xl-registration.jpg 15cbf951f9db173a45428b32dcec87aca83bbdf0
    xlattice-2014.jpg f185aaad06db71acd9454f31054c62c56d36f37f
-  index.md abc6c1d412944e13e4017ab53bcc61d8bd418632
+  index.md 77e863345b9c437061fcc472b65bbab6fb464d77
  installit e6894c052702baebbaa1a2a99bb727b997a87521
- magicSack e2c529d96ac1270bf8966f9d5242001e038a5936
- magicsack
-  __init__.py 840e32a72f7ef191b31c2d74e6fd2c21f316578a
- name-pairs-local cb943c08889cc8ce89294f9ed213a7afc7624211
  pylintrc dd234fda24a547a9071f1e4608a3c1f3b7de9aa0
- renameLocal 074d6389cfdb200f0960f25ba7fcd9d32bc71cac
- renamePerAPI 8cde30e3cd640863cc2799c31b6b6c3dc73e12b7
- setup.py d8ccba013d9e16addc798f9e225bd5609e16caf9
- styleit c815d1ff71415548a0380a2e64f1e1b7f8acf4a4
- test.all 207facc295e5745a02b6e8f731c31a938136d935
- test_puzzle.py 533dc16c005314318248582c0b772d4db2c75a0f
+ setup.py 15f2e17895653f6f7e75ac1d4e10934320f63a97
+ src
+  magicSack e2c529d96ac1270bf8966f9d5242001e038a5936
+  magicsack
+   __init__.py 35aba1f70d9c3f6fbada56756512c04b3ed2da11
+ styleit b0458bf530fa0fde767f81451e2beb0741e3c700
+ test.all e4fd93657affb8eca595a47c481ecff8f7e1dd18
+ tests
+  test_puzzle.py 533dc16c005314318248582c0b772d4db2c75a0f
 # END CONTENT #
 
-LoAI5jLLctT2F3707U4xCYWlERdwpzD+fWbxBPoDMAekb7A2OzsPgx4c5cLuZpmDI0msjT2gU45t7e5tUCJf/fVP7B4/zaNtVA5+2kMT9fzNjmu80Xsk36REuxDK5mXH+TcEEJMiVfUfej0YzJ8j7qp01Du5+uRUHVT6+yeEloXqoSuirYhqmNYuBrY6Zus7mkxLtcGlv0AJ6ntRbOIXwWTMX+zXkLnajiQTLr14ef3guZ/1p0sdQOgWtnWUnViEf3j1xt1uDajl4Ntzmxffruka21w794CcUkYccigkxXF2ORnIwUUDl3vajS6rv4rPqe/NndMEIJatMHqJcznk+A==
+H1Y3a+u9P6LGx7uKOcY5kHLP1qDncz94JzMlF3z1ao4gMUOQbwddWmCXsz8VqaQ9nINsGTrR97RIGI1XqRZsXmub23ZKY3FYf4vCrlQucmomaUGmor2qP+n7ssodf+fE6ZApRTlhqsXjSxdBj2M79Qazh/sBhEV11uOTKhBlpoeogZ9ljY2vLqTQoD8l5tJ9eYfpKNYz/vDJvuOVLnlMHkBkn7DTgRydYVChevCYbTJ4xFknxW9TEwNoUdF4h00vuNjK8BSRdC70VAcsieX9be5oUp0za0KEGs5cI4hZu2MHY8Mx2zFkfmTqrOJjWBiAY3pq4QpAm6YJsXfwG0334A==
