@@ -1,12 +1,11 @@
 # see http://docs.python.org/distutils/sourcedist.html
 
 include netDistrib.conf
-include auto8it countem installit
-include .gitignore CHANGES MANIFEST.in README.* TODO
-include magicSack
-recursive-include magicsack *.py
+include CHANGES LICENSE* MANIFEST.in README* TODO
+include bkp2U checkCoverage countem doPyLint installit pylintrc styleit test.all
+include setup.py
+recursive-include src *
+recursive-include tests *
 recursive-include ghpDoc *
 global-exclude junk* .*swp 
 prune   .svn
-
-

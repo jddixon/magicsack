@@ -2,11 +2,13 @@
 project:magicsack
 package:magicsack
 mainlang:py
-version:0.3.1
-versionDate:2016-09-12
+version:0.4.5
+versionDate:2017-06-12
 :?dirs?:
 dir:std:ghpDoc
 dir:std:dist
+dir:std:src
+dir:std:tests
 dir:std:.dvcz
 dir:pkg:magicsack
 dir:clr:build
@@ -40,4 +42,3 @@ bash:std:checkCoverage
 bash:local:M
 py:std:setup.py
 py:global:magicSack
-py:test:test_puzzle.py
