@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.7
+    2017-09-05
+        * pep8; add tox.ini, *requirements.txt                      SLOC 1447
 v0.4.6
     2017-07-17
         * rewrite setup.py, MANIFEST.in; edit cfg files             SLOC 1043
@@ -116,6 +119,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 
