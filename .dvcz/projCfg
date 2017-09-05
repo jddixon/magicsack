@@ -2,8 +2,8 @@
 project:magicsack
 package:magicsack
 mainlang:py
-version:0.4.5
-versionDate:2017-06-12
+version:0.4.6
+versionDate:2017-07-17
 :?dirs?:
 dir:std:ghpDoc
 dir:std:dist
@@ -28,6 +28,9 @@ code:std:pylintrc
 code:std:.coveragerc
 code:std:check.summary
 code:std:MANIFEST.in
+code:std:tox.ini
+code:std:requirements.txt
+code:std:test_requirements.txt
 txt:std:LICENSE-MIT.md
 txt:std:CHANGES
 txt:std:README.md
@@ -40,5 +43,6 @@ bash:std:test.all
 bash:std:doPyLint
 bash:std:checkCoverage
 bash:local:M
+py:std:setup.cfg
 py:std:setup.py
 py:global:magicSack

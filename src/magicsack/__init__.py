@@ -8,8 +8,8 @@ import os
 
 from pbkdf2 import PBKDF2       # note name of package is u/c
 from Crypto.Cipher import AES
-from Crypto.Hash import SHA
-from Crypto.PublicKey import RSA
+# from Crypto.Hash import SHA
+# from Crypto.PublicKey import RSA
 
 from buildlist import BuildList
 from nlhtree import NLHLeaf
@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.6'
-__version_date__ = '2017-07-17'
+__version__ = '0.4.7'
+__version_date__ = '2017-09-05'
 
 
 class Config(object):
@@ -101,10 +101,10 @@ def devise_puzzle(pass_phrase, salt, rng, count=1000):
 
     # DEBUG
     # print("devise_puzzle:")
-    #print("  key       %s" % binascii.b2a_hex(key))
-    #print("  iv_        %s" % binascii.b2a_hex(iv_))
-    #print("  salt      %s" % binascii.b2a_hex(salt))
-    #print("  padded    %s" % binascii.b2a_hex(padded))
+    # print("  key       %s" % binascii.b2a_hex(key))
+    # print("  iv_        %s" % binascii.b2a_hex(iv_))
+    # print("  salt      %s" % binascii.b2a_hex(salt))
+    # print("  padded    %s" % binascii.b2a_hex(padded))
     # END
 
     cipher = AES.new(key, AES.MODE_CBC, iv_)
@@ -127,10 +127,10 @@ def check_puzzle(puzzle, pass_phrase, salt, count=1000):
     decrypted = cipher.decrypt(puzzle[AES_BLOCK_SIZE:])
     # DEBUG
     # print("check_puzzle:")
-    #print("  key       %s" % binascii.b2a_hex(key))
-    #print("  iv_       %s" % binascii.b2a_hex(iv_))
-    #print("  salt      %s" % binascii.b2a_hex(salt))
-    #print("  decrypted %s" % binascii.b2a_hex(decrypted))
+    # print("  key       %s" % binascii.b2a_hex(key))
+    # print("  iv_       %s" % binascii.b2a_hex(iv_))
+    # print("  salt      %s" % binascii.b2a_hex(salt))
+    # print("  decrypted %s" % binascii.b2a_hex(decrypted))
     # END
     data = strip_pkcs7_padding(decrypted, AES_BLOCK_SIZE)
     soln = bytes(data[8:8 + AES_BLOCK_SIZE])
@@ -230,8 +230,9 @@ def add_a_file(global_ns, path_to_file, list_path=None):
 
         length, hash_back = u_dir.put_data(encrypted, hex_hash)
         if hash_back != key:
-            status = "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
-                hex_hash, hash_back)
+            status =\
+                "INTERNAL ERROR: content key was '%s' but u returned '%s'" % (
+                    hex_hash, hash_back)
         if not status and len(encrypted) != length:
             status = "length encrypted %d but %d bytes written" % (
                 len(encrypted), length)
@@ -279,8 +280,8 @@ def read_build_list(global_ns):
     """ Read a serialized BuildList from the disk.  """
     key = global_ns.key
     magic_path = global_ns.magic_path
-    rng = global_ns.rng
-    u_path = global_ns.u_path
+    # rng = global_ns.rng
+    # u_path = global_ns.u_path
     hashtype = global_ns.hashtype
 
     path_to_build_list = os.path.join(magic_path, 'bVal')
