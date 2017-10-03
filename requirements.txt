@@ -1,3 +1,6 @@
 # magicsack/requirements.txt
 pycrypt
+pbkdf2
+scandir
+setuptools
 
