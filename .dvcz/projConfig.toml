@@ -1,0 +1,37 @@
+# projConfig.toml for magicsack
+
+[meta]
+    version= '0.1.0'
+
+[project]
+    name = 'magicsack'               # external name = distribution name
+    package = 'magicsack'            # internal name
+    main_lang = 'py'
+    version = '0.4.8'
+    version_date = '2017-10-03'
+    author = 'Jim Dixon'
+    author_email = 'jddixon@gmail.com'
+    description='generator for magicsack projects'
+    copyright = '2014-2017'
+    dev_status = 'pre-alpha'
+    license = 'mit'
+    relpath = 'py/magicsack'
+    state = 'shared'
+    url = 'https://jddixon.github.io/magicsack'
+
+[py]
+    packages = ['magicsack']
+    package_dir = ['src']
+    test_dir = 'tests'
+    py_modules = []
+    scripts=['src/magicSack]
+    ext_modules = []
+
+    # sdReq output
+    distshare = ['buildlist','nlhtree_py','optionz','rnglib','xlattice_py']
+    requirements=['pycrypt','pbkdf2','scandir','setuptools']
+    test_requirements=[]
+
+    # trove stuff is TBD
+
+

@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.8
+    2017-10-03
+        * add projConfig.toml                                       SLOC 1485
 v0.4.7
     2017-09-05
         * pep8; add tox.ini, *requirements.txt                      SLOC 1447
@@ -119,6 +122,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 

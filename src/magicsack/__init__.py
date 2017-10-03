@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.7'
-__version_date__ = '2017-09-05'
+__version__ = '0.4.8'
+__version_date__ = '2017-10-03'
 
 
 class Config(object):
