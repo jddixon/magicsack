@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.8'
-__version_date__ = '2017-10-03'
+__version__ = '0.4.9'
+__version_date__ = '2017-12-16'
 
 
 class Config(object):
@@ -77,7 +77,7 @@ def generate_key(pass_phrase, salt, count=1000):
     """
     if not pass_phrase or pass_phrase == '':
         raise RuntimeError("empty pass_phrase")
-    if not salt or len(salt) == 0:
+    if not salt:
         raise RuntimeError("you must supply a salt")
     # it is also possible to set the hash function used; it defaults
     # to HMAC-SHA1
@@ -144,15 +144,13 @@ def insert_named_value(global_ns, name, data):
     Pad and encrypt the data, writing the encrypted value into u_dir.
     If successful, return an NLHLeaf.
     """
-    key = global_ns.key
-    rng = global_ns.rng
     u_dir = global_ns.u_dir
     u_path = global_ns.u_path
     hashtype = global_ns.hashtype
 
     padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
-    iv_ = bytes(rng.some_bytes(AES_BLOCK_SIZE))
-    cipher = AES.new(key, AES.MODE_CBC, iv_)
+    iv_ = bytes(global_ns.rng.some_bytes(AES_BLOCK_SIZE))
+    cipher = AES.new(global_ns.key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
 
     # hash and encrypt the data ---------------------------
@@ -255,14 +253,12 @@ def write_build_list(global_ns):
     key = global_ns.key
     magic_path = global_ns.magic_path
     rng = global_ns.rng
-    sk_ = global_ns.sk_
-    sk_priv_ = global_ns.sk_priv
     title = global_ns.title
     tree = global_ns.tree
-    build_list = BuildList(title, sk_, tree)
+    build_list = BuildList(title, global_ns.sk_, tree)
 
     # sign build list, encrypt, write to disk -------------
-    build_list.sign(sk_priv_)
+    build_list.sign(global_ns.sk_priv_)
     text = build_list.__str__()
     # DEBUG
     print("BUILD LIST:\n%s" % text)

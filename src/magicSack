@@ -103,7 +103,7 @@ def handle_init(global_ns, sub_argv, pass_phrase):
             sys.exit(1)
 
     # Neither the salt nor any IVs need be kept secret.
-    salt = bytes(rng.someBytes(16))
+    salt = bytes(rng.some_bytes(16))
     key = bytes(PBKDF2(pass_phrase, salt).read(32))     # 32-byte key
 
     # loop: verify that second passphrase matches first
@@ -160,7 +160,6 @@ def handle_init(global_ns, sub_argv, pass_phrase):
             # XXX A MISTAKE:
             magic_path = os.path.join('tmp', '.magicsack')
     else:
-        # pylint:disable=redefined-variable-type
         rng = SystemRNG()
 
     # sanity checks -------------------------------------------------
@@ -334,7 +333,7 @@ def handle_destroy(global_ns, sub_argv):
         length = info.st_size
         count = int(0.000001 + (length + BLOCKSIZE - 1) / BLOCKSIZE)
         with open(path_to_file, 'wb') as file:
-            for nbr in range(count):
+            for _ in range(count):
                 file.write(chars)
                 file.flush()
         with open(path_to_file, 'wb') as file:
@@ -342,7 +341,7 @@ def handle_destroy(global_ns, sub_argv):
                 file.write(comps)
                 file.flush()
         with open(path_to_file, 'wb') as file:
-            for nbr in range(count):
+            for _ in range(count):
                 file.write(rnd)
                 file.flush()
         os.remove(path_to_file)

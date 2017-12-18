@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.9
+    2017-12-16
+        * pylinting and minor bug fixes                             SLOC 1477
 v0.4.8
     2017-10-03
         * add projConfig.toml                                       SLOC 1485
@@ -122,6 +125,8 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
+
 
 
 
