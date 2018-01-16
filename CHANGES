@@ -1,5 +1,8 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.10
+    2018-01-16
+        * AES_BLOCK_SIZE -> _BYTES                                  SLOC 1479
 v0.4.9
     2017-12-16
         * pylinting and minor bug fixes                             SLOC 1477
@@ -125,6 +128,7 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
 
 
 
