@@ -14,7 +14,7 @@ from Crypto.Cipher import AES
 from buildlist import BuildList
 from nlhtree import NLHLeaf
 from xlattice.crypto import (
-    AES_BLOCK_SIZE, add_pkcs7_padding, strip_pkcs7_padding)
+    AES_BLOCK_BYTES, add_pkcs7_padding, strip_pkcs7_padding)
 
 __all__ = ['__version__', '__version_date__',
            'check_puzzle',
@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.9'
-__version_date__ = '2017-12-16'
+__version__ = '0.4.10'
+__version_date__ = '2018-01-16'
 
 
 class Config(object):
@@ -91,13 +91,13 @@ def devise_puzzle(pass_phrase, salt, rng, count=1000):
     """
 
     key = generate_key(pass_phrase, salt, count)
-    junk = rng.some_bytes(2 * AES_BLOCK_SIZE)
-    iv_ = bytes(junk[:AES_BLOCK_SIZE])
-    junk0 = junk[AES_BLOCK_SIZE: AES_BLOCK_SIZE + 8]
-    junk2 = junk[AES_BLOCK_SIZE + 8:]
+    junk = rng.some_bytes(2 * AES_BLOCK_BYTES)
+    iv_ = bytes(junk[:AES_BLOCK_BYTES])
+    junk0 = junk[AES_BLOCK_BYTES: AES_BLOCK_BYTES + 8]
+    junk2 = junk[AES_BLOCK_BYTES + 8:]
 
     data = junk0 + salt + junk2
-    padded = bytes(add_pkcs7_padding(data, AES_BLOCK_SIZE))
+    padded = bytes(add_pkcs7_padding(data, AES_BLOCK_BYTES))
 
     # DEBUG
     # print("devise_puzzle:")
@@ -122,9 +122,9 @@ def check_puzzle(puzzle, pass_phrase, salt, count=1000):
     """
     key = generate_key(pass_phrase, salt, count)
 
-    iv_ = puzzle[:AES_BLOCK_SIZE]
+    iv_ = puzzle[:AES_BLOCK_BYTES]
     cipher = AES.new(key, AES.MODE_CBC, iv_)
-    decrypted = cipher.decrypt(puzzle[AES_BLOCK_SIZE:])
+    decrypted = cipher.decrypt(puzzle[AES_BLOCK_BYTES:])
     # DEBUG
     # print("check_puzzle:")
     # print("  key       %s" % binascii.b2a_hex(key))
@@ -132,8 +132,8 @@ def check_puzzle(puzzle, pass_phrase, salt, count=1000):
     # print("  salt      %s" % binascii.b2a_hex(salt))
     # print("  decrypted %s" % binascii.b2a_hex(decrypted))
     # END
-    data = strip_pkcs7_padding(decrypted, AES_BLOCK_SIZE)
-    soln = bytes(data[8:8 + AES_BLOCK_SIZE])
+    data = strip_pkcs7_padding(decrypted, AES_BLOCK_BYTES)
+    soln = bytes(data[8:8 + AES_BLOCK_BYTES])
 
     return soln == salt, key
 
@@ -148,8 +148,8 @@ def insert_named_value(global_ns, name, data):
     u_path = global_ns.u_path
     hashtype = global_ns.hashtype
 
-    padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
-    iv_ = bytes(global_ns.rng.some_bytes(AES_BLOCK_SIZE))
+    padded = add_pkcs7_padding(data, AES_BLOCK_BYTES)
+    iv_ = bytes(global_ns.rng.some_bytes(AES_BLOCK_BYTES))
     cipher = AES.new(global_ns.key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
 
@@ -216,8 +216,8 @@ def add_a_file(global_ns, path_to_file, list_path=None):
 
         with open(path_to_file, 'rb') as file:
             data = file.read()
-        padded = add_pkcs7_padding(data, AES_BLOCK_SIZE)
-        iv_ = rng.some_bytes(AES_BLOCK_SIZE)
+        padded = add_pkcs7_padding(data, AES_BLOCK_BYTES)
+        iv_ = rng.some_bytes(AES_BLOCK_BYTES)
         cipher = AES.new(key, AES.MODE_CBC, iv_)
         encrypted = cipher.encrypt(padded)
 
@@ -263,8 +263,8 @@ def write_build_list(global_ns):
     # DEBUG
     print("BUILD LIST:\n%s" % text)
     # END
-    padded = add_pkcs7_padding(text.encode('utf-8'), AES_BLOCK_SIZE)
-    iv_ = bytes(rng.some_bytes(AES_BLOCK_SIZE))
+    padded = add_pkcs7_padding(text.encode('utf-8'), AES_BLOCK_BYTES)
+    iv_ = bytes(rng.some_bytes(AES_BLOCK_BYTES))
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     encrypted = cipher.encrypt(padded)
     path_to_build_list = os.path.join(magic_path, 'bVal')
@@ -283,11 +283,11 @@ def read_build_list(global_ns):
     path_to_build_list = os.path.join(magic_path, 'bVal')
     with open(path_to_build_list, 'rb') as file:
         data = file.read()
-    iv_ = data[:AES_BLOCK_SIZE]
-    ciphertext = data[AES_BLOCK_SIZE]
+    iv_ = data[:AES_BLOCK_BYTES]
+    ciphertext = data[AES_BLOCK_BYTES]
     cipher = AES.new(key, AES.MODE_CBC, iv_)
     plaintext = cipher.decrypt(ciphertext)
-    text = strip_pkcs7_padding(plaintext, AES_BLOCK_SIZE).decode('utf-8')
+    text = strip_pkcs7_padding(plaintext, AES_BLOCK_BYTES).decode('utf-8')
     build_list = BuildList.parse(text, hashtype)
     if not build_list.verify():
         raise MagicSackError("could not verify digital signature on BuildList")

@@ -6,7 +6,7 @@
 import time
 import unittest
 
-from xlattice.crypto import AES_BLOCK_SIZE
+from xlattice.crypto import AES_BLOCK_BYTES
 from rnglib import SimpleRNG
 from magicsack import generate_key, devise_puzzle, check_puzzle
 
@@ -27,7 +27,7 @@ class TestPuzzle(unittest.TestCase):
         salt = bytes(self.rng.some_bytes(16))
         key = generate_key(pass_phrase, salt, count=20)
         self.assertTrue(key is not None)
-        self.assertEqual(len(key), 2 * AES_BLOCK_SIZE)
+        self.assertEqual(len(key), 2 * AES_BLOCK_BYTES)
 
     def test_puzzle(self):
         """ Verify that the generated puzzle works as expected. """
