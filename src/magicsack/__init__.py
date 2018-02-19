@@ -13,8 +13,8 @@ from Crypto.Cipher import AES
 
 from buildlist import BuildList
 from nlhtree import NLHLeaf
-from xlattice.crypto import (
-    AES_BLOCK_BYTES, add_pkcs7_padding, strip_pkcs7_padding)
+from xlcrypto import AES_BLOCK_BYTES
+from xlcrypto.padding import add_pkcs7_padding, strip_pkcs7_padding
 
 __all__ = ['__version__', '__version_date__',
            'check_puzzle',
@@ -23,8 +23,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.10'
-__version_date__ = '2018-01-16'
+__version__ = '0.4.11'
+__version_date__ = '2018-02-19'
 
 
 class Config(object):
@@ -69,7 +69,7 @@ def name_from_title(title):
     return ''.join(chars)
 
 
-def generate_key(pass_phrase, salt, count=1000):
+def generate_key(pass_phrase, salt, iterations=1000):
     """
     pass_phrase is a string which may not be empty.  salt is a
     byte array, conventionally either 8 or 16 bytes.  The
@@ -81,16 +81,16 @@ def generate_key(pass_phrase, salt, count=1000):
         raise RuntimeError("you must supply a salt")
     # it is also possible to set the hash function used; it defaults
     # to HMAC-SHA1
-    return PBKDF2(pass_phrase, salt, iterations=count).read(32)
+    return PBKDF2(pass_phrase, salt, iterations=iterations).read(32)
 
 
-def devise_puzzle(pass_phrase, salt, rng, count=1000):
+def devise_puzzle(pass_phrase, salt, rng, iterations=1000):
     """
     Create the puzzle that the user has to solve (provide a key for)
     in order to access the Magic Sack.
     """
 
-    key = generate_key(pass_phrase, salt, count)
+    key = generate_key(pass_phrase, salt, iterations)
     junk = rng.some_bytes(2 * AES_BLOCK_BYTES)
     iv_ = bytes(junk[:AES_BLOCK_BYTES])
     junk0 = junk[AES_BLOCK_BYTES: AES_BLOCK_BYTES + 8]
@@ -113,14 +113,14 @@ def devise_puzzle(pass_phrase, salt, rng, count=1000):
     return puzzle
 
 
-def check_puzzle(puzzle, pass_phrase, salt, count=1000):
+def check_puzzle(puzzle, pass_phrase, salt, iterations=10000):
     """
     Determine the key then decipher the puzzle, verifying that
     the copy of the salt embedded in the puzzle is the same as
     the salt from the config file.  Return whether verification
     succeeded.
     """
-    key = generate_key(pass_phrase, salt, count)
+    key = generate_key(pass_phrase, salt, iterations)
 
     iv_ = puzzle[:AES_BLOCK_BYTES]
     cipher = AES.new(key, AES.MODE_CBC, iv_)

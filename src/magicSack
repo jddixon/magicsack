@@ -18,17 +18,14 @@ except ImportError:
     from scandir import scandir
 
 from pbkdf2 import PBKDF2       # note name of package is u/c
-# from Crypto.Cipher import AES
-# from Crypto.Hash import SHA        # presumably SHA1
 from Crypto.PublicKey import RSA
-# from Crypto.Signature import PKCS1_PSS
 
 # from buildlist import BuildList
 from nlhtree import NLHTree
 from optionz import dump_options
 from rnglib import SimpleRNG, SystemRNG
 from xlattice import HashTypes
-from xlattice.u import UDir
+from xlu import UDir
 from xlattice.ui import confirm_y_or_n, passwd_strength
 from magicsack import(__version__, __version_date__,
                       check_puzzle, devise_puzzle, make_named_value_leaf,
@@ -307,7 +304,7 @@ def handle_destroy(global_ns, sub_argv):
         else:
             print("please answer Y or N")
 
-    # recursively scrub files and delete containing diretories
+    # recursively scrub files and delete containing directories
 
     # for each directoy
     #     for each file: get filesize, round up to multiple of 4 KB;
