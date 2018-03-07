@@ -3,18 +3,17 @@
 """ Library for the Magic Sack. """
 
 import binascii
-import hashlib
 import os
 
-from pbkdf2 import PBKDF2       # note name of package is u/c
+# NEEDED NEXT:
 from Crypto.Cipher import AES
-# from Crypto.Hash import SHA
-# from Crypto.PublicKey import RSA
 
-from buildlist import BuildList
+from xlattice import HashTypes
 from nlhtree import NLHLeaf
-from xlattice.crypto import (
-    AES_BLOCK_BYTES, add_pkcs7_padding, strip_pkcs7_padding)
+from buildlist import BuildList
+from xlcrypto import AES_BLOCK_BYTES
+from xlcrypto.padding import add_pkcs7_padding, strip_pkcs7_padding
+from xlcrypto.keyderiv import pbkdf2
 
 __all__ = ['__version__', '__version_date__',
            'check_puzzle',
@@ -23,8 +22,8 @@ __all__ = ['__version__', '__version_date__',
            'make_named_value_leaf', 'name_from_title',
            'write_build_list', ]
 
-__version__ = '0.4.10'
-__version_date__ = '2018-01-16'
+__version__ = '0.4.13'
+__version_date__ = '2018-03-07'
 
 
 class Config(object):
@@ -69,28 +68,33 @@ def name_from_title(title):
     return ''.join(chars)
 
 
-def generate_key(pass_phrase, salt, count=1000):
+def generate_key(pass_phrase, salt, iterations=10000):
     """
     pass_phrase is a string which may not be empty.  salt is a
     byte array, conventionally either 8 or 16 bytes.  The
     key returned is a 256-bit value.
     """
+
+    # THESE CHECKS SHOULD BE IN THE LIBRARY #####
     if not pass_phrase or pass_phrase == '':
         raise RuntimeError("empty pass_phrase")
     if not salt:
         raise RuntimeError("you must supply a salt")
     # it is also possible to set the hash function used; it defaults
     # to HMAC-SHA1
-    return PBKDF2(pass_phrase, salt, iterations=count).read(32)
+    # END LIBRARY CHECKS ########################
+
+    # return PBKDF2(pass_phrase, salt, iterations=iterations).read(32)
+    return pbkdf2(pass_phrase, salt, hashtype=HashTypes.SHA2,
+                  iterations=iterations)
 
 
-def devise_puzzle(pass_phrase, salt, rng, count=1000):
+def devise_puzzle(pass_phrase, salt, rng, iterations=1000):
     """
     Create the puzzle that the user has to solve (provide a key for)
     in order to access the Magic Sack.
     """
-
-    key = generate_key(pass_phrase, salt, count)
+    key = generate_key(pass_phrase, salt, iterations)
     junk = rng.some_bytes(2 * AES_BLOCK_BYTES)
     iv_ = bytes(junk[:AES_BLOCK_BYTES])
     junk0 = junk[AES_BLOCK_BYTES: AES_BLOCK_BYTES + 8]
@@ -113,14 +117,14 @@ def devise_puzzle(pass_phrase, salt, rng, count=1000):
     return puzzle
 
 
-def check_puzzle(puzzle, pass_phrase, salt, count=1000):
+def check_puzzle(puzzle, pass_phrase, salt, iterations=10000):
     """
     Determine the key then decipher the puzzle, verifying that
     the copy of the salt embedded in the puzzle is the same as
     the salt from the config file.  Return whether verification
     succeeded.
     """
-    key = generate_key(pass_phrase, salt, count)
+    key = generate_key(pass_phrase, salt, iterations)
 
     iv_ = puzzle[:AES_BLOCK_BYTES]
     cipher = AES.new(key, AES.MODE_CBC, iv_)
@@ -154,7 +158,7 @@ def insert_named_value(global_ns, name, data):
     encrypted = cipher.encrypt(padded)
 
     # hash and encrypt the data ---------------------------
-    sha = hashlib.sha256()
+    sha = XLSHA2()
     sha.update(encrypted)
     bin_hash = sha.digest()
     hex_hash = binascii.b2a_hex(bin_hash).decode('utf-8')
@@ -222,7 +226,7 @@ def add_a_file(global_ns, path_to_file, list_path=None):
         encrypted = cipher.encrypt(padded)
 
         # hash the file and add it to u_dir ----------------
-        sha = hashlib.sha256()
+        sha = XLSHA2()
         sha.update(encrypted)
         hex_hash = sha.hexdigest()
 

@@ -1,5 +1,15 @@
 ~/dev/py/magicsack/CHANGES
 
+v0.4.13
+    2018-03-07
+        * update setup.py, tox config files                         SLOC 1478
+v0.4.12
+    2018-02-21
+        * replaced hashlib with xlcrypto.hash                       
+        * replaced PBKDF2 with xlcrypto.keyderiv.pbkdf2             SLOC 
+v0.4.11
+    2018-02-19
+        * xlattice.crypto becomes xlcrypto                          SLOC 1476
 v0.4.10
     2018-01-16
         * AES_BLOCK_SIZE -> _BYTES                                  SLOC 1479
@@ -128,6 +138,9 @@ v0.2.9
 0.1.0
     2014-10-02
         * initial commit                                            SLOC  152 
+
+
+
 
 
 
